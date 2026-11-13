@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuthManager Module Tests</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-left: 4px solid #ddd;
+        }
+        .test-section h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        .test-case {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .passed {
+            border-left: 4px solid #28a745;
+            color: #28a745;
+        }
+        .failed {
+            border-left: 4px solid #dc3545;
+            color: #dc3545;
+        }
+        .summary {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f0f0f0;
+            border-radius: 8px;
+            border-top: 3px solid #007bff;
+        }
+        .summary h2 {
+            margin-top: 0;
+        }
+        .passed-count {
+            color: #28a745;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .failed-count {
+            color: #dc3545;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .total-count {
+            color: #333;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .checkmark {
+            color: #28a745;
+            margin-right: 5px;
+        }
+        .cross {
+            color: #dc3545;
+            margin-right: 5px;
+        }
+        #test-output {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✓ AuthManager Module Tests</h1>
+        <p>Test suite for Task 3.1: AuthManager Module Implementation</p>
+        
+        <div class="test-section">
+            <h3>Test Status</h3>
+            <button onclick="runTests()" style="padding: 10px 20px; font-size: 16px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                Run Tests
+            </button>
+        </div>
+        
+        <div id="test-output"></div>
+        <div id="summary-output"></div>
+    </div>
+
+    <!-- Load AuthManager Module -->
+    <script src="../js/auth-manager.js"></script>
+    
+    <script>
+        // Mock sessionStorage for testing (normally available in browser)
+        if (!window.sessionStorage) {
+            window.sessionStorage = {
+                data: {},
+                setItem: function(key, value) {
+                    this.data[key] = value;
+                },
+                getItem: function(key) {
+                    return this.data[key] || null;
+                },
+                removeItem: function(key) {
+                    delete this.data[key];
+                },
+                clear: function() {
+                    this.data = {};
+                }
+            };
+        }
+
+        const TestResults = {
+            passed: 0,
+            failed: 0,
+            tests: [],
+            logs: []
+        };
+
+        function log(message, type = 'info') {
+            console.log(message);
+            TestResults.logs.push({ message, type });
+        }
+
+        function assert(condition, testName, message) {
+            if (condition) {
+                TestResults.passed++;
+                TestResults.tests.push({ 
+                    name: testName, 
+                    status: 'PASSED',
+                    message: ''
+                });
+                log(`✓ PASSED: ${testName}`, 'pass');
+            } else {
+                TestResults.failed++;
+                TestResults.tests.push({ 
+                    name: testName, 
+                    status: 'FAILED',
+                    message: message
+                });
+                log(`✗ FAILED: ${testName}`, 'fail');
+                log(`  ${message}`, 'fail');
+            }
+        }
+
+        function assertEqual(actual, expected, testName) {
+            const passed = JSON.stringify(actual) === JSON.stringify(expected);
+            assert(passed, testName, `Expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
+        }
+
+        function assertNull(value, testName) {
+            assert(value === null, testName, `Expected null, got ${JSON.stringify(value)}`);
+        }
+
+        function assertNotNull(value, testName) {
+            assert(value !== null, testName, `Expected not null, got ${value}`);
+        }
+
+        function runTests() {
+            // Reset results
+            TestResults.passed = 0;
+            TestResults.failed = 0;
+            TestResults.tests = [];
+            TestResults.logs = [];
+
+            log('=== AuthManager Module Tests ===');
+            log('');
+
+            // Cleanup before tests
+            sessionStorage.clear();
+
+            // TEST 1: Valid admin login
+            log('TEST 1: Valid admin login');
+            const adminSession = AuthManager.login('admin', '123456');
+            assertNotNull(adminSession, 'Admin login returns session object');
+            assertEqual(adminSession.username, 'admin', 'Session contains correct username');
+            assertEqual(adminSession.role, 'admin', 'Session contains correct role');
+            assertEqual(adminSession.displayName, 'Administrator', 'Session contains correct displayName');
+            log('');
+
+            // TEST 2: Valid staff login
+            log('TEST 2: Valid staff login');
+            sessionStorage.clear();
+            const staffSession = AuthManager.login('staff', 'staff123');
+            assertNotNull(staffSession, 'Staff login returns session object');
+            assertEqual(staffSession.username, 'staff', 'Session contains correct username');
+            assertEqual(staffSession.role, 'staff', 'Session contains correct role');
+            assertEqual(staffSession.displayName, 'Staf Marketplace', 'Session contains correct displayName');
+            log('');
+
+            // TEST 3: Invalid username
+            log('TEST 3: Invalid username');
+            sessionStorage.clear();
+            const invalidUserResult = AuthManager.login('invalid', '123456');
+            assertNull(invalidUserResult, 'Invalid username returns null');
+            log('');
+
+            // TEST 4: Invalid password
+            log('TEST 4: Invalid password');
+            sessionStorage.clear();
+            const invalidPwdResult = AuthManager.login('admin', 'wrongpassword');
+            assertNull(invalidPwdResult, 'Invalid password returns null');
+            log('');
+
+            // TEST 5: isAuthenticated() when logged in
+            log('TEST 5: isAuthenticated() when logged in');
+            sessionStorage.clear();
+            AuthManager.login('admin', '123456');
+            assert(AuthManager.isAuthenticated() === true, 'isAuthenticated returns true when logged in', 
+                'Expected true');
+            log('');
+
+            // TEST 6: isAuthenticated() when logged out
+            log('TEST 6: isAuthenticated() when logged out');
+            sessionStorage.clear();
+            assert(AuthManager.isAuthenticated() === false, 'isAuthenticated returns false when not logged in', 
+                'Expected false');
+            log('');
+
+            // TEST 7: getCurrentUser() when authenticated
+            log('TEST 7: getCurrentUser() when authenticated');
+            sessionStorage.clear();
+            AuthManager.login('admin', '123456');
+            const currentUser = AuthManager.getCurrentUser();
+            assertNotNull(currentUser, 'getCurrentUser returns user object');
+            assertEqual(currentUser.username, 'admin', 'getCurrentUser returns correct username');
+            assertEqual(currentUser.role, 'admin', 'getCurrentUser returns correct role');
+            assertEqual(currentUser.displayName, 'Administrator', 'getCurrentUser returns correct displayName');
+            assert(!currentUser.loginTime, 'getCurrentUser does not include loginTime');
+            log('');
+
+            // TEST 8: getCurrentUser() when not authenticated
+            log('TEST 8: getCurrentUser() when not authenticated');
+            sessionStorage.clear();
+            const noUser = AuthManager.getCurrentUser();
+            assertNull(noUser, 'getCurrentUser returns null when not authenticated');
+            log('');
+
+            // TEST 9: logout() clears session
+            log('TEST 9: logout() clears session');
+            sessionStorage.clear();
+            AuthManager.login('admin', '123456');
+            AuthManager.logout();
+            assert(AuthManager.isAuthenticated() === false, 'logout() clears session', 
+                'Expected isAuthenticated to return false after logout');
+            log('');
+
+            // TEST 10: hasRole() with correct role
+            log('TEST 10: hasRole() with correct role');
+            sessionStorage.clear();
+            AuthManager.login('admin', '123456');
+            assert(AuthManager.hasRole('admin') === true, 'hasRole returns true for correct role', 
+                'Expected true');
+            log('');
+
+            // TEST 11: hasRole() with incorrect role
+            log('TEST 11: hasRole() with incorrect role');
+            assert(AuthManager.hasRole('staff') === false, 'hasRole returns false for incorrect role', 
+                'Expected false');
+            log('');
+
+            // TEST 12: hasRole() when not authenticated
+            log('TEST 12: hasRole() when not authenticated');
+            sessionStorage.clear();
+            assert(AuthManager.hasRole('admin') === false, 'hasRole returns false when not authenticated', 
+                'Expected false');
+            log('');
+
+            // TEST 13: Session persists in sessionStorage
+            log('TEST 13: Session persists in sessionStorage');
+            sessionStorage.clear();
+            AuthManager.login('staff', 'staff123');
+            const storedSession = JSON.parse(sessionStorage.getItem('marketplace_session'));
+            assertNotNull(storedSession, 'Session stored in sessionStorage');
+            assertEqual(storedSession.username, 'staff', 'Stored session has correct username');
+            log('');
+
+            // TEST 14: Login overwrites previous session
+            log('TEST 14: Login overwrites previous session');
+            sessionStorage.clear();
+            AuthManager.login('admin', '123456');
+            AuthManager.login('staff', 'staff123');
+            const currentUser2 = AuthManager.getCurrentUser();
+            assertEqual(currentUser2.username, 'staff', 'New login overwrites previous session');
+            log('');
+
+            // TEST 15: IIFE encapsulation - private members not accessible
+            log('TEST 15: IIFE encapsulation');
+            assert(typeof AuthManager.USERS === 'undefined', 'USERS constant is private', 
+                'USERS should not be accessible');
+            assert(typeof AuthManager.SESSION_KEY === 'undefined', 'SESSION_KEY constant is private', 
+                'SESSION_KEY should not be accessible');
+            log('');
+
+            // Display results
+            displayResults();
+        }
+
+        function displayResults() {
+            const output = document.getElementById('test-output');
+            const summary = document.getElementById('summary-output');
+
+            // Display logs
+            let logHtml = TestResults.logs.map(log => {
+                if (log.type === 'pass') {
+                    return `<span class="checkmark">✓</span>${log.message}`;
+                } else if (log.type === 'fail') {
+                    return `<span class="cross">✗</span>${log.message}`;
+                }
+                return log.message;
+            }).join('\n');
+
+            output.innerHTML = `<div>${logHtml}</div>`;
+
+            // Display summary
+            const allPassed = TestResults.failed === 0;
+            const summaryHtml = `
+                <div class="summary">
+                    <h2>${allPassed ? '✓' : '✗'} Test Summary</h2>
+                    <p><span class="total-count">Total Tests: ${TestResults.passed + TestResults.failed}</span></p>
+                    <p><span class="passed-count">Passed: ${TestResults.passed}</span></p>
+                    <p><span class="failed-count">Failed: ${TestResults.failed}</span></p>
+                    ${allPassed ? '<p><strong style="color: #28a745;">✓ ALL TESTS PASSED!</strong></p>' : '<p><strong style="color: #dc3545;">✗ SOME TESTS FAILED</strong></p>'}
+                    ${!allPassed ? `<div style="margin-top: 15px; padding: 10px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px;">
+                        <strong>Failed Tests:</strong>
+                        <ul>${TestResults.tests.filter(t => t.status === 'FAILED').map(t => `<li>${t.name}: ${t.message}</li>`).join('')}</ul>
+                    </div>` : ''}
+                </div>
+            `;
+            
+            summary.innerHTML = summaryHtml;
+        }
+
+        // Run tests on page load
+        window.addEventListener('load', function() {
+            log('Page loaded. Click "Run Tests" to start.');
+            displayResults();
+        });
+    </script>
+</body>
+</html>

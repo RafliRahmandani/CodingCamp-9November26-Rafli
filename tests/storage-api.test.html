@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StorageAPI Tests</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background-color: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .test-case {
+            margin: 15px 0;
+            padding: 10px;
+            border-left: 4px solid #ddd;
+            background-color: #fafafa;
+        }
+        .test-case.pass {
+            border-left-color: #4CAF50;
+            background-color: #f1f8f4;
+        }
+        .test-case.fail {
+            border-left-color: #f44336;
+            background-color: #fef5f5;
+        }
+        .test-case.pending {
+            border-left-color: #ff9800;
+            background-color: #fffbf0;
+        }
+        .test-status {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .test-status.pass {
+            color: #4CAF50;
+        }
+        .test-status.fail {
+            color: #f44336;
+        }
+        .test-status.pending {
+            color: #ff9800;
+        }
+        .test-message {
+            margin-top: 5px;
+            font-size: 14px;
+            color: #666;
+        }
+        .summary {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .summary.all-pass {
+            background-color: #c8e6c9;
+            color: #2e7d32;
+        }
+        .summary.has-fail {
+            background-color: #ffcdd2;
+            color: #c62828;
+        }
+    </style>
+</head>
+<body>
+    <h1>StorageAPI Module Tests</h1>
+    
+    <div class="test-container">
+        <div class="test-title">Module Structure Tests</div>
+        <div id="test-structure"></div>
+    </div>
+
+    <div class="test-container">
+        <div class="test-title">setItem() Method Tests</div>
+        <div id="test-set-item"></div>
+    </div>
+
+    <div class="test-container">
+        <div class="test-title">getItem() Method Tests</div>
+        <div id="test-get-item"></div>
+    </div>
+
+    <div class="test-container">
+        <div class="test-title">removeItem() Method Tests</div>
+        <div id="test-remove-item"></div>
+    </div>
+
+    <div class="test-container">
+        <div class="test-title">clear() Method Tests</div>
+        <div id="test-clear"></div>
+    </div>
+
+    <div class="test-container">
+        <div class="test-title">isAvailable() Method Tests</div>
+        <div id="test-is-available"></div>
+    </div>
+
+    <div class="test-container">
+        <div class="test-title">getUsage() Method Tests</div>
+        <div id="test-get-usage"></div>
+    </div>
+
+    <div class="test-container">
+        <div class="test-title">Error Handling Tests</div>
+        <div id="test-error-handling"></div>
+    </div>
+
+    <div id="summary"></div>
+
+    <script src="../js/storage-api.js"></script>
+    <script src="storage-api.test.js"></script>
+</body>
+</html>

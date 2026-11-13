@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Render Validation Functions Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+    }
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .test-header {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .test-result {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 3px;
+    }
+    .pass {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    .fail {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    .error-message {
+      color: red;
+      font-size: 0.9em;
+      display: block;
+      margin-top: 5px;
+    }
+    .input-error {
+      border: 2px solid red !important;
+      background-color: #fff5f5;
+    }
+    .global-error {
+      background-color: #f8d7da;
+      color: #721c24;
+      padding: 15px;
+      margin: 10px 0;
+      border: 1px solid #f5c6cb;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Render Validation Functions Test</h1>
+  
+  <div class="test-section">
+    <div class="test-header">Test Form (for manual testing)</div>
+    <form id="transaction-form">
+      <div>
+        <label for="item-name">Item Name</label>
+        <input type="text" id="item-name" name="itemName" />
+        <span id="item-name-error" class="error-message" role="alert"></span>
+      </div>
+      
+      <div>
+        <label for="amount">Amount</label>
+        <input type="number" id="amount" name="amount" />
+        <span id="amount-error" class="error-message" role="alert"></span>
+      </div>
+      
+      <div>
+        <label for="category">Category</label>
+        <select id="category" name="category">
+          <option value="">-- Select Category --</option>
+          <option value="Food">Food</option>
+          <option value="Transport">Transport</option>
+          <option value="Fun">Fun</option>
+        </select>
+        <span id="category-error" class="error-message" role="alert"></span>
+      </div>
+    </form>
+  </div>
+  
+  <div id="test-results"></div>
+  
+  <script>
+    // Simple RenderModule implementation for testing
+    const RenderModule = {
+      renderValidationError(fieldId, message) {
+        const errorSpan = document.getElementById(`${fieldId}-error`);
+        
+        if (errorSpan) {
+          errorSpan.textContent = message;
+        }
+        
+        const inputField = document.getElementById(fieldId);
+        
+        if (inputField) {
+          inputField.classList.add('input-error');
+          inputField.setAttribute('aria-invalid', 'true');
+        }
+      },
+      
+      clearValidationErrors() {
+        const errorSpans = document.querySelectorAll('.error-message');
+        errorSpans.forEach(span => {
+          span.textContent = '';
+        });
+        
+        const inputFields = document.querySelectorAll('.input-error');
+        inputFields.forEach(field => {
+          field.classList.remove('input-error');
+          field.removeAttribute('aria-invalid');
+        });
+      },
+      
+      clearForm() {
+        const form = document.getElementById('transaction-form');
+        
+        if (form) {
+          form.reset();
+        }
+      },
+      
+      displayGlobalError(message) {
+        let errorElement = document.getElementById('global-error');
+        
+        if (!errorElement) {
+          errorElement = document.createElement('div');
+          errorElement.id = 'global-error';
+          errorElement.className = 'global-error';
+          errorElement.setAttribute('role', 'alert');
+          
+          document.body.insertBefore(errorElement, document.body.firstChild);
+        }
+        
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+      }
+    };
+    
+    // Test runner
+    const testResults = [];
+    
+    function runTest(testName, testFn) {
+      try {
+        testFn();
+        testResults.push({ name: testName, passed: true });
+      } catch (error) {
+        testResults.push({ name: testName, passed: false, error: error.message });
+      }
+    }
+    
+    function assert(condition, message) {
+      if (!condition) {
+        throw new Error(message);
+      }
+    }
+    
+    // Test 1: renderValidationError displays error message
+    runTest('renderValidationError displays error message', () => {
+      RenderModule.renderValidationError('item-name', 'Item Name is required');
+      const errorSpan = document.getElementById('item-name-error');
+      assert(errorSpan.textContent === 'Item Name is required', 'Error message not set correctly');
+    });
+    
+    // Test 2: renderValidationError adds input-error class
+    runTest('renderValidationError adds input-error class', () => {
+      const inputField = document.getElementById('item-name');
+      assert(inputField.classList.contains('input-error'), 'input-error class not added');
+    });
+    
+    // Test 3: renderValidationError sets aria-invalid
+    runTest('renderValidationError sets aria-invalid="true"', () => {
+      const inputField = document.getElementById('item-name');
+      assert(inputField.getAttribute('aria-invalid') === 'true', 'aria-invalid not set');
+    });
+    
+    // Test 4: renderValidationError works for amount field
+    runTest('renderValidationError works for amount field', () => {
+      RenderModule.renderValidationError('amount', 'Amount must be at least 0.01');
+      const errorSpan = document.getElementById('amount-error');
+      const inputField = document.getElementById('amount');
+      assert(errorSpan.textContent === 'Amount must be at least 0.01', 'Amount error not set');
+      assert(inputField.classList.contains('input-error'), 'Amount input-error class not added');
+    });
+    
+    // Test 5: renderValidationError works for category field
+    runTest('renderValidationError works for category field', () => {
+      RenderModule.renderValidationError('category', 'Category is required');
+      const errorSpan = document.getElementById('category-error');
+      const inputField = document.getElementById('category');
+      assert(errorSpan.textContent === 'Category is required', 'Category error not set');
+      assert(inputField.classList.contains('input-error'), 'Category input-error class not added');
+    });
+    
+    // Test 6: clearValidationErrors removes all error messages
+    runTest('clearValidationErrors removes all error messages', () => {
+      RenderModule.clearValidationErrors();
+      const itemNameError = document.getElementById('item-name-error');
+      const amountError = document.getElementById('amount-error');
+      const categoryError = document.getElementById('category-error');
+      assert(itemNameError.textContent === '', 'Item name error not cleared');
+      assert(amountError.textContent === '', 'Amount error not cleared');
+      assert(categoryError.textContent === '', 'Category error not cleared');
+    });
+    
+    // Test 7: clearValidationErrors removes input-error class
+    runTest('clearValidationErrors removes input-error class', () => {
+      const itemNameInput = document.getElementById('item-name');
+      const amountInput = document.getElementById('amount');
+      const categoryInput = document.getElementById('category');
+      assert(!itemNameInput.classList.contains('input-error'), 'Item name input-error not removed');
+      assert(!amountInput.classList.contains('input-error'), 'Amount input-error not removed');
+      assert(!categoryInput.classList.contains('input-error'), 'Category input-error not removed');
+    });
+    
+    // Test 8: clearValidationErrors removes aria-invalid attribute
+    runTest('clearValidationErrors removes aria-invalid attribute', () => {
+      const itemNameInput = document.getElementById('item-name');
+      const amountInput = document.getElementById('amount');
+      const categoryInput = document.getElementById('category');
+      assert(!itemNameInput.hasAttribute('aria-invalid'), 'Item name aria-invalid not removed');
+      assert(!amountInput.hasAttribute('aria-invalid'), 'Amount aria-invalid not removed');
+      assert(!categoryInput.hasAttribute('aria-invalid'), 'Category aria-invalid not removed');
+    });
+    
+    // Test 9: clearForm resets all input values
+    runTest('clearForm resets all input values', () => {
+      // Set some values
+      document.getElementById('item-name').value = 'Test Item';
+      document.getElementById('amount').value = '50.00';
+      document.getElementById('category').value = 'Food';
+      
+      // Clear the form
+      RenderModule.clearForm();
+      
+      // Check values are cleared
+      assert(document.getElementById('item-name').value === '', 'Item name not cleared');
+      assert(document.getElementById('amount').value === '', 'Amount not cleared');
+      assert(document.getElementById('category').value === '', 'Category not cleared');
+    });
+    
+    // Test 10: displayGlobalError creates error element
+    runTest('displayGlobalError creates and displays error', () => {
+      RenderModule.displayGlobalError('LocalStorage is unavailable');
+      const errorElement = document.getElementById('global-error');
+      assert(errorElement !== null, 'Global error element not created');
+      assert(errorElement.textContent === 'LocalStorage is unavailable', 'Error message not set');
+      assert(errorElement.getAttribute('role') === 'alert', 'role="alert" not set');
+    });
+    
+    // Test 11: displayGlobalError updates existing error element
+    runTest('displayGlobalError updates existing error element', () => {
+      RenderModule.displayGlobalError('Storage quota exceeded');
+      const errorElement = document.getElementById('global-error');
+      assert(errorElement.textContent === 'Storage quota exceeded', 'Error message not updated');
+    });
+    
+    // Display results
+    const resultsContainer = document.getElementById('test-results');
+    testResults.forEach(result => {
+      const resultDiv = document.createElement('div');
+      resultDiv.className = `test-section test-result ${result.passed ? 'pass' : 'fail'}`;
+      resultDiv.innerHTML = `
+        <strong>${result.passed ? '✓' : '✗'} ${result.name}</strong>
+        ${result.error ? `<br><small>Error: ${result.error}</small>` : ''}
+      `;
+      resultsContainer.appendChild(resultDiv);
+    });
+    
+    // Summary
+    const passedCount = testResults.filter(r => r.passed).length;
+    const totalCount = testResults.length;
+    const summaryDiv = document.createElement('div');
+    summaryDiv.className = `test-section ${passedCount === totalCount ? 'pass' : 'fail'}`;
+    summaryDiv.innerHTML = `<strong>Summary: ${passedCount}/${totalCount} tests passed</strong>`;
+    resultsContainer.insertBefore(summaryDiv, resultsContainer.firstChild);
+  </script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Expense and Budget Visualizer - Track your daily expenses with visual analytics">
+    <meta name="keywords" content="expense tracker, budget, visualizer, finance">
+    <title>Expense & Budget Visualizer</title>
+    
+    <!-- CSS files -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Main application container -->
+    <div id="app">
+        <!-- Input Form Section -->
+        <form id="transaction-form" class="transaction-form">
+            <h1>Add Expense</h1>
+            
+            <div class="form-group">
+                <label for="item-name">Item Name</label>
+                <input 
+                    type="text" 
+                    id="item-name" 
+                    name="itemName" 
+                    maxlength="100"
+                    aria-required="true"
+                    aria-describedby="item-name-error"
+                    placeholder="Enter item name"
+                />
+                <span id="item-name-error" class="error-message" role="alert" aria-live="polite"></span>
+            </div>
+            
+            <div class="form-group">
+                <label for="amount">Amount</label>
+                <input 
+                    type="number" 
+                    id="amount" 
+                    name="amount" 
+                    step="0.01"
+                    min="0.01"
+                    max="999999.99"
+                    aria-required="true"
+                    aria-describedby="amount-error"
+                    placeholder="0.00"
+                />
+                <span id="amount-error" class="error-message" role="alert" aria-live="polite"></span>
+            </div>
+            
+            <div class="form-group">
+                <label for="category">Category</label>
+                <select 
+                    id="category" 
+                    name="category"
+                    aria-required="true"
+                    aria-describedby="category-error"
+                >
+                    <option value="">-- Select Category --</option>
+                    <option value="Food">Food</option>
+                    <option value="Transport">Transport</option>
+                    <option value="Fun">Fun</option>
+                </select>
+                <span id="category-error" class="error-message" role="alert" aria-live="polite"></span>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Add Transaction</button>
+                <button type="reset" class="btn btn-secondary">Clear</button>
+            </div>
+            
+            <div id="form-success" class="success-message" role="status" aria-live="polite"></div>
+        </form>
+
+        <!-- Balance Display Section -->
+        <div class="balance-display">
+            <h2>Total Expenses</h2>
+            <div id="balance-amount" class="balance-amount" aria-live="polite">
+                $0.00
+            </div>
+        </div>
+
+        <!-- Transaction List Section -->
+        <div class="transaction-list-container">
+            <h2>Transaction History</h2>
+            <div id="transaction-list" class="transaction-list" role="list">
+                <!-- Dynamic content rendered here -->
+                <p class="empty-state">No transactions recorded</p>
+            </div>
+        </div>
+
+        <!-- Chart Section -->
+        <div class="chart-container">
+            <h2>Expenses by Category</h2>
+            <div id="chart-wrapper">
+                <canvas id="expense-chart" aria-label="Pie chart showing expense distribution by category"></canvas>
+                <p id="chart-empty-state" class="chart-empty-state" style="display: none;">
+                    No expense data available
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- External Dependencies -->
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"
+            integrity="sha384-GsW3YpbcyNmCUMIybN8xIVG45+6Kz5YuHg60/JicLkOLVmMetasleFgJDM6KTf60m"
+            crossorigin="anonymous"></script>
+
+    <!-- Application Script -->
+    <script src="js/app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CalculationEngine Tests</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-left: 4px solid #3498db;
+            padding-left: 10px;
+        }
+        
+        .test-suite {
+            margin-bottom: 30px;
+        }
+        
+        .test-case {
+            padding: 12px;
+            margin-bottom: 8px;
+            border-left: 4px solid #ddd;
+            background-color: #f9f9f9;
+        }
+        
+        .test-case.pass {
+            border-left-color: #27ae60;
+            background-color: #f0f9f1;
+        }
+        
+        .test-case.fail {
+            border-left-color: #e74c3c;
+            background-color: #fdf0f0;
+        }
+        
+        .test-case .icon {
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        .test-case.pass .icon {
+            color: #27ae60;
+        }
+        
+        .test-case.fail .icon {
+            color: #e74c3c;
+        }
+        
+        .test-details {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .test-name {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
+        .summary {
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        
+        .summary.pass {
+            background-color: #d4edda;
+            border: 1px solid #27ae60;
+            color: #155724;
+        }
+        
+        .summary.fail {
+            background-color: #f8d7da;
+            border: 1px solid #e74c3c;
+            color: #721c24;
+        }
+        
+        .overall-summary {
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+            font-size: 18px;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+        }
+        
+        .overall-summary.pass {
+            background-color: #d4edda;
+            color: #155724;
+            border-color: #27ae60;
+        }
+        
+        .overall-summary.fail {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-color: #e74c3c;
+        }
+        
+        .button-group {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        button {
+            padding: 10px 20px;
+            margin: 0 5px;
+            font-size: 14px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: #3498db;
+            color: white;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .info-box {
+            background-color: #ecf0f1;
+            border-left: 4px solid #3498db;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CalculationEngine Module Tests</h1>
+        
+        <div class="info-box">
+            <strong>Module:</strong> CalculationEngine<br>
+            <strong>Purpose:</strong> Test calculation and currency formatting functions<br>
+            <strong>Pattern:</strong> IIFE (Immediately Invoked Function Expression)
+        </div>
+        
+        <div class="button-group">
+            <button onclick="runAllTests()">Run All Tests</button>
+            <button onclick="clearResults()">Clear Results</button>
+        </div>
+        
+        <div id="results"></div>
+    </div>
+    
+    <!-- Load the CalculationEngine module -->
+    <script src="../js/calculation-engine.js"></script>
+    
+    <script>
+        // Test runner
+        
+        function createTestResult(testName, passed, details = {}) {
+            return {
+                testName,
+                passed,
+                details
+            };
+        }
+        
+        function testCalculateTotalBelanja() {
+            const results = [];
+            
+            const tests = [
+                {
+                    name: 'Basic calculation: (2 × 5000000) - 100000 = 9900000',
+                    inputs: { qty: 2, price: 5000000, discount: 100000 },
+                    expected: 9900000
+                },
+                {
+                    name: 'No discount: (2 × 5000000) - 0 = 10000000',
+                    inputs: { qty: 2, price: 5000000, discount: 0 },
+                    expected: 10000000
+                },
+                {
+                    name: 'Zero quantity: (0 × 5000000) - 100000 = 0',
+                    inputs: { qty: 0, price: 5000000, discount: 100000 },
+                    expected: 0
+                },
+                {
+                    name: 'Discount exceeds total: (1 × 1000) - 2000 = 0',
+                    inputs: { qty: 1, price: 1000, discount: 2000 },
+                    expected: 0
+                },
+                {
+                    name: 'String inputs: ("2", "5000000", "100000")',
+                    inputs: { qty: '2', price: '5000000', discount: '100000' },
+                    expected: 9900000
+                },
+                {
+                    name: 'Decimal values: (2.5 × 5000.50) - 500.25 ≈ 12000',
+                    inputs: { qty: 2.5, price: 5000.50, discount: 500.25 },
+                    expected: 12000
+                }
+            ];
+            
+            tests.forEach((test, index) => {
+                try {
+                    const result = CalculationEngine.calculateTotalBelanja(
+                        test.inputs.qty,
+                        test.inputs.price,
+                        test.inputs.discount
+                    );
+                    
+                    const precision = 0.01;
+                    const isCorrect = Math.abs(result - test.expected) < precision;
+                    
+                    results.push(createTestResult(
+                        `calculateTotalBelanja Test ${index + 1}: ${test.name}`,
+                        isCorrect,
+                        {
+                            inputs: test.inputs,
+                            expected: test.expected,
+                            actual: result
+                        }
+                    ));
+                } catch (error) {
+                    results.push(createTestResult(
+                        `calculateTotalBelanja Test ${index + 1}: ${test.name}`,
+                        false,
+                        { error: error.message }
+                    ));
+                }
+            });
+            
+            return results;
+        }
+        
+        function testFormatCurrency() {
+            const results = [];
+            
+            const tests = [
+                { input: 9900000, expected: 'Rp 9.900.000,00', name: '9900000' },
+                { input: 1000, expected: 'Rp 1.000,00', name: '1000' },
+                { input: 1000.50, expected: 'Rp 1.000,50', name: '1000.50' },
+                { input: 5000000, expected: 'Rp 5.000.000,00', name: '5000000' },
+                { input: 12345.67, expected: 'Rp 12.345,67', name: '12345.67' },
+                { input: 0, expected: 'Rp 0,00', name: '0' }
+            ];
+            
+            tests.forEach((test, index) => {
+                try {
+                    const result = CalculationEngine.formatCurrency(test.input);
+                    const isCorrect = result === test.expected;
+                    
+                    results.push(createTestResult(
+                        `formatCurrency Test ${index + 1}: ${test.name}`,
+                        isCorrect,
+                        {
+                            input: test.input,
+                            expected: test.expected,
+                            actual: result
+                        }
+                    ));
+                } catch (error) {
+                    results.push(createTestResult(
+                        `formatCurrency Test ${index + 1}: ${test.name}`,
+                        false,
+                        { error: error.message }
+                    ));
+                }
+            });
+            
+            return results;
+        }
+        
+        function testParseCurrency() {
+            const results = [];
+            
+            const tests = [
+                { input: 'Rp 9.900.000,00', expected: 9900000, name: 'Rp 9.900.000,00' },
+                { input: 'Rp 1.000,00', expected: 1000, name: 'Rp 1.000,00' },
+                { input: 'Rp 1.000,50', expected: 1000.50, name: 'Rp 1.000,50' },
+                { input: 'Rp 5.000.000,00', expected: 5000000, name: 'Rp 5.000.000,00' },
+                { input: 'Rp 12.345,67', expected: 12345.67, name: 'Rp 12.345,67' },
+                { input: 'Rp 0,00', expected: 0, name: 'Rp 0,00' }
+            ];
+            
+            tests.forEach((test, index) => {
+                try {
+                    const result = CalculationEngine.parseCurrency(test.input);
+                    const precision = 0.01;
+                    const isCorrect = Math.abs(result - test.expected) < precision;
+                    
+                    results.push(createTestResult(
+                        `parseCurrency Test ${index + 1}: ${test.name}`,
+                        isCorrect,
+                        {
+                            input: test.input,
+                            expected: test.expected,
+                            actual: result
+                        }
+                    ));
+                } catch (error) {
+                    results.push(createTestResult(
+                        `parseCurrency Test ${index + 1}: ${test.name}`,
+                        false,
+                        { error: error.message }
+                    ));
+                }
+            });
+            
+            return results;
+        }
+        
+        function testFormatLocaleNumber() {
+            const results = [];
+            
+            const tests = [
+                { input: 5000000, expected: '5.000.000,00', name: '5000000' },
+                { input: 1234.56, expected: '1.234,56', name: '1234.56' },
+                { input: 1000, expected: '1.000,00', name: '1000' },
+                { input: 0, expected: '0,00', name: '0' },
+                { input: 9900000, expected: '9.900.000,00', name: '9900000' }
+            ];
+            
+            tests.forEach((test, index) => {
+                try {
+                    const result = CalculationEngine.formatLocaleNumber(test.input);
+                    const isCorrect = result === test.expected;
+                    
+                    results.push(createTestResult(
+                        `formatLocaleNumber Test ${index + 1}: ${test.name}`,
+                        isCorrect,
+                        {
+                            input: test.input,
+                            expected: test.expected,
+                            actual: result
+                        }
+                    ));
+                } catch (error) {
+                    results.push(createTestResult(
+                        `formatLocaleNumber Test ${index + 1}: ${test.name}`,
+                        false,
+                        { error: error.message }
+                    ));
+                }
+            });
+            
+            return results;
+        }
+        
+        function testRoundTrip() {
+            const results = [];
+            const testValues = [1000, 5000000, 12345.67, 999999.99, 100.50, 0];
+            
+            testValues.forEach((value, index) => {
+                try {
+                    const formatted = CalculationEngine.formatCurrency(value);
+                    const parsed = CalculationEngine.parseCurrency(formatted);
+                    const precision = 0.01;
+                    const isCorrect = Math.abs(parsed - value) < precision;
+                    
+                    results.push(createTestResult(
+                        `Round-Trip Test ${index + 1}: ${value}`,
+                        isCorrect,
+                        {
+                            original: value,
+                            formatted: formatted,
+                            parsed: parsed
+                        }
+                    ));
+                } catch (error) {
+                    results.push(createTestResult(
+                        `Round-Trip Test ${index + 1}: ${value}`,
+                        false,
+                        { error: error.message }
+                    ));
+                }
+            });
+            
+            return results;
+        }
+        
+        function renderTestResults(allResults) {
+            const container = document.getElementById('results');
+            let html = '';
+            
+            const suites = [
+                { name: 'calculateTotalBelanja', results: allResults.calculateTotalBelanja },
+                { name: 'formatCurrency', results: allResults.formatCurrency },
+                { name: 'parseCurrency', results: allResults.parseCurrency },
+                { name: 'formatLocaleNumber', results: allResults.formatLocaleNumber },
+                { name: 'Round-Trip (format + parse)', results: allResults.roundTrip }
+            ];
+            
+            let totalPassed = 0;
+            let totalTests = 0;
+            
+            suites.forEach(suite => {
+                const suitePassed = suite.results.filter(r => r.passed).length;
+                const suiteTotal = suite.results.length;
+                totalPassed += suitePassed;
+                totalTests += suiteTotal;
+                
+                html += `<div class="test-suite">
+                    <h2>${suite.name}</h2>
+                    <div class="summary ${suitePassed === suiteTotal ? 'pass' : 'fail'}">
+                        ${suitePassed}/${suiteTotal} passed
+                    </div>`;
+                
+                suite.results.forEach(result => {
+                    const testClass = result.passed ? 'pass' : 'fail';
+                    const icon = result.passed ? '✓' : '✗';
+                    
+                    html += `<div class="test-case ${testClass}">
+                        <span class="icon">${icon}</span>
+                        <span class="test-name">${result.testName}</span>`;
+                    
+                    if (!result.passed || result.details.expected !== undefined) {
+                        html += `<div class="test-details">`;
+                        
+                        if (result.details.error) {
+                            html += `Error: ${result.details.error}<br>`;
+                        }
+                        
+                        if (result.details.expected !== undefined) {
+                            if (typeof result.details.expected === 'object') {
+                                html += `Expected: ${JSON.stringify(result.details.expected)}<br>`;
+                                html += `Actual: ${JSON.stringify(result.details.actual)}<br>`;
+                            } else {
+                                html += `Expected: ${result.details.expected}<br>`;
+                                html += `Actual: ${result.details.actual}<br>`;
+                            }
+                        }
+                        
+                        if (result.details.inputs !== undefined) {
+                            html += `Inputs: ${JSON.stringify(result.details.inputs)}<br>`;
+                        }
+                        
+                        if (result.details.formatted !== undefined) {
+                            html += `Original: ${result.details.original}<br>`;
+                            html += `Formatted: "${result.details.formatted}"<br>`;
+                            html += `Parsed: ${result.details.parsed}<br>`;
+                        }
+                        
+                        html += `</div>`;
+                    }
+                    
+                    html += `</div>`;
+                });
+                
+                html += `</div>`;
+            });
+            
+            const overallClass = totalPassed === totalTests ? 'pass' : 'fail';
+            html += `<div class="overall-summary ${overallClass}">
+                <strong>OVERALL: ${totalPassed}/${totalTests} tests passed</strong><br>
+                ${totalPassed === totalTests ? '✓ ALL TESTS PASSED' : '✗ SOME TESTS FAILED'}
+            </div>`;
+            
+            container.innerHTML = html;
+        }
+        
+        function runAllTests() {
+            const allResults = {
+                calculateTotalBelanja: testCalculateTotalBelanja(),
+                formatCurrency: testFormatCurrency(),
+                parseCurrency: testParseCurrency(),
+                formatLocaleNumber: testFormatLocaleNumber(),
+                roundTrip: testRoundTrip()
+            };
+            
+            renderTestResults(allResults);
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+        
+        // Run tests automatically on page load
+        window.addEventListener('load', runAllTests);
+    </script>
+</body>
+</html>

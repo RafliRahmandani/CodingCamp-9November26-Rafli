@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Balance Calculation Tests</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    h1 {
+      color: #333;
+      border-bottom: 3px solid #4A90E2;
+      padding-bottom: 10px;
+    }
+    h2 {
+      color: #555;
+      margin-top: 30px;
+      border-bottom: 2px solid #ccc;
+      padding-bottom: 5px;
+    }
+    .test-group {
+      background: white;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .test-result {
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 3px;
+    }
+    .pass {
+      background-color: #d4edda;
+      color: #155724;
+      border-left: 4px solid #28a745;
+    }
+    .fail {
+      background-color: #f8d7da;
+      color: #721c24;
+      border-left: 4px solid #dc3545;
+    }
+    .summary {
+      margin-top: 30px;
+      padding: 20px;
+      background: white;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .summary.all-pass {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    .summary.has-fail {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    #balance-amount {
+      font-size: 24px;
+      font-weight: bold;
+      margin: 20px 0;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 5px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>Balance Calculation Tests</h1>
+  <div id="balance-amount">$0.00</div>
+  <div id="test-results"></div>
+  <div id="summary"></div>
+
+  <script>
+    // Include the RenderModule balance calculation code
+    const RenderModule = {
+      calculateTotalBalance(transactions) {
+        if (!transactions || transactions.length === 0) {
+          return 0.00;
+        }
+        
+        const total = transactions.reduce((sum, transaction) => {
+          const amount = parseFloat(transaction.amount);
+          
+          if (amount >= 0.01 && amount <= 999999999.99) {
+            return sum + amount;
+          }
+          return sum;
+        }, 0);
+        
+        return Math.round(total * 100) / 100;
+      },
+      
+      renderBalance(transactions) {
+        const balanceElement = document.getElementById('balance-amount');
+        const total = this.calculateTotalBalance(transactions);
+        
+        if (total > 999999999.99) {
+          balanceElement.textContent = total.toExponential(2);
+        } else {
+          balanceElement.textContent = `$${total.toFixed(2)}`;
+        }
+      }
+    };
+
+    // Test framework
+    let totalTests = 0;
+    let passedTests = 0;
+    let failedTests = 0;
+    const resultsContainer = document.getElementById('test-results');
+
+    function assert(condition, testName, expected, actual) {
+      totalTests++;
+      const result = document.createElement('div');
+      result.className = 'test-result';
+      
+      if (condition) {
+        passedTests++;
+        result.classList.add('pass');
+        result.textContent = `✓ ${testName}`;
+      } else {
+        failedTests++;
+        result.classList.add('fail');
+        result.textContent = `✗ ${testName} - Expected: ${JSON.stringify(expected)}, Got: ${JSON.stringify(actual)}`;
+      }
+      
+      resultsContainer.appendChild(result);
+    }
+
+    function testGroup(title) {
+      const group = document.createElement('div');
+      group.className = 'test-group';
+      const heading = document.createElement('h2');
+      heading.textContent = title;
+      resultsContainer.appendChild(heading);
+    }
+
+    // Run tests
+    testGroup('calculateTotalBalance Tests');
+
+    // Test empty array
+    let result = RenderModule.calculateTotalBalance([]);
+    assert(result === 0.00, 
+           'should return 0.00 for empty array', 
+           0.00, result);
+
+    // Test null input
+    result = RenderModule.calculateTotalBalance(null);
+    assert(result === 0.00, 
+           'should return 0.00 for null input', 
+           0.00, result);
+
+    // Test undefined input
+    result = RenderModule.calculateTotalBalance(undefined);
+    assert(result === 0.00, 
+           'should return 0.00 for undefined input', 
+           0.00, result);
+
+    // Test single transaction
+    result = RenderModule.calculateTotalBalance([
+      { id: '1', itemName: 'Test', amount: 10.50, category: 'Food', timestamp: '2024-01-01' }
+    ]);
+    assert(result === 10.50, 
+           'should calculate single transaction correctly', 
+           10.50, result);
+
+    // Test multiple transactions
+    result = RenderModule.calculateTotalBalance([
+      { id: '1', itemName: 'Test1', amount: 10.50, category: 'Food', timestamp: '2024-01-01' },
+      { id: '2', itemName: 'Test2', amount: 20.30, category: 'Transport', timestamp: '2024-01-02' },
+      { id: '3', itemName: 'Test3', amount: 5.20, category: 'Fun', timestamp: '2024-01-03' }
+    ]);
+    assert(result === 36.00, 
+           'should sum multiple transactions correctly', 
+           36.00, result);
+
+    // Test precision with two decimal places
+    result = RenderModule.calculateTotalBalance([
+      { id: '1', itemName: 'Test1', amount: 10.11, category: 'Food', timestamp: '2024-01-01' },
+      { id: '2', itemName: 'Test2', amount: 20.22, category: 'Transport', timestamp: '2024-01-02' },
+      { id: '3', itemName: 'Test3', amount: 5.33, category: 'Fun', timestamp: '2024-01-03' }
+    ]);
+    assert(result === 35.66, 
+           'should maintain precision to two decimal places', 
+           35.66, result);
+
+    // Test rounding with multiply by 100 technique
+    result = RenderModule.calculateTotalBalance([
+      { id: '1', itemName: 'Test1', amount: 0.1, category: 'Food', timestamp: '2024-01-01' },
+      { id: '2', itemName: 'Test2', amount: 0.2, category: 'Transport', timestamp: '2024-01-02' }
+    ]);
+    assert(result === 0.30, 
+           'should handle floating point precision correctly (0.1 + 0.2 = 0.30)', 
+           0.30, result);
+
+    // Test minimum valid amount (0.01)
+    result = RenderModule.calculateTotalBalance([
+      { id: '1', itemName: 'Test', amount: 0.01, category: 'Food', timestamp: '2024-01-01' }
+    ]);
+    assert(result === 0.01, 
+           'should include minimum valid amount 0.01', 
+           0.01, result);
+
+    // Test filtering out amounts below minimum (0.01)
+    result = RenderModule.calculateTotalBalance([
+      { id: '1', itemName: 'Test1', amount: 10.00, category: 'Food', timestamp: '2024-01-01' },
+      { id: '2', itemName: 'Test2', amount: 0.001, category: 'Transport', timestamp: '2024-01-02' },
+      { id: '3', itemName: 'Test3', amount: 5.00, category: 'Fun', timestamp: '2024-01-03' }
+    ]);
+    assert(result === 15.00, 
+           'should exclude amounts below 0.01', 
+           15.00, result);
+
+    // Test filtering out zero amounts
+    result = RenderModule.calculateTotalBalance([
+      { id: '1', itemName: 'Test1', amount: 10.00, category: 'Food', timestamp: '2024-01-01' },
+      { id: '2', itemName: 'Test2', amount: 0, category: 'Transport', timestamp: '2024-01-02' },
+      { id: '3', itemName: 'Test3', amount: 5.00, category: 'Fun', timestamp: '2024-01-03' }
+    ]);
+    assert(result === 15.00, 
+           'should exclude zero amounts', 
+           15.00, result);
+
+    // Test filtering out negative amounts
+    result = RenderModule.calculateTotalBalance([
+      { id: '1', itemName: 'Test1', amount: 10.00, category: 'Food', timestamp: '2024-01-01' },
+      { id: '2', itemName: 'Test2', amount: -5.00, category: 'Transport', timestamp: '2024-01-02' },
+      { id: '3', itemName: 'Test3', amount: 5.00, category: 'Fun', timestamp: '2024-01-03' }
+    ]);
+    assert(result === 15.00, 
+           'should exclude negative amounts', 
+           15.00, result);
+
+    // Test maximum valid amount (999999999.99)
+    result = RenderModule.calculateTotalBalance([
+      { id: '1', itemName: 'Test', amount: 999999999.99, category: 'Food', timestamp: '2024-01-01' }
+    ]);
+    assert(result === 999999999.99, 
+           'should include maximum valid amount 999999999.99', 
+           999999999.99, result);
+
+    // Test filtering out amounts above maximum
+    result = RenderModule.calculateTotalBalance([
+      { id: '1', itemName: 'Test1', amount: 10.00, category: 'Food', timestamp: '2024-01-01' },
+      { id: '2', itemName: 'Test2', amount: 1000000000, category: 'Transport', timestamp: '2024-01-02' },
+      { id: '3', itemName: 'Test3', amount: 5.00, category: 'Fun', timestamp: '2024-01-03' }
+    ]);
+    assert(result === 15.00, 
+           'should exclude amounts above 999999999.99', 
+           15.00, result);
+
+    // Test large sum within valid range
+    result = RenderModule.calculateTotalBalance([
+      { id: '1', itemName: 'Test1', amount: 500000000, category: 'Food', timestamp: '2024-01-01' },
+      { id: '2', itemName: 'Test2', amount: 400000000, category: 'Transport', timestamp: '2024-01-02' },
+      { id: '3', itemName: 'Test3', amount: 50000000, category: 'Fun', timestamp: '2024-01-03' }
+    ]);
+    assert(result === 950000000, 
+           'should calculate large sums correctly', 
+           950000000, result);
+
+    testGroup('renderBalance Tests');
+
+    // Test rendering with standard format
+    RenderModule.renderBalance([
+      { id: '1', itemName: 'Test', amount: 123.45, category: 'Food', timestamp: '2024-01-01' }
+    ]);
+    let displayText = document.getElementById('balance-amount').textContent;
+    assert(displayText === '$123.45', 
+           'should format standard amount with $ and two decimal places', 
+           '$123.45', displayText);
+
+    // Test rendering empty array
+    RenderModule.renderBalance([]);
+    displayText = document.getElementById('balance-amount').textContent;
+    assert(displayText === '$0.00', 
+           'should display $0.00 for empty transactions', 
+           '$0.00', displayText);
+
+    // Test rendering with zero padding
+    RenderModule.renderBalance([
+      { id: '1', itemName: 'Test', amount: 5, category: 'Food', timestamp: '2024-01-01' }
+    ]);
+    displayText = document.getElementById('balance-amount').textContent;
+    assert(displayText === '$5.00', 
+           'should pad with zeros to two decimal places', 
+           '$5.00', displayText);
+
+    // Test rendering with rounding
+    RenderModule.renderBalance([
+      { id: '1', itemName: 'Test', amount: 10.556, category: 'Food', timestamp: '2024-01-01' }
+    ]);
+    displayText = document.getElementById('balance-amount').textContent;
+    assert(displayText === '$10.56', 
+           'should round to two decimal places', 
+           '$10.56', displayText);
+
+    // Test rendering very large amount (exceeding 999999999.99)
+    RenderModule.renderBalance([
+      { id: '1', itemName: 'Test1', amount: 600000000, category: 'Food', timestamp: '2024-01-01' },
+      { id: '2', itemName: 'Test2', amount: 500000000, category: 'Transport', timestamp: '2024-01-02' }
+    ]);
+    displayText = document.getElementById('balance-amount').textContent;
+    // Should be in exponential notation
+    assert(displayText.includes('e+') && displayText.length < 10, 
+           'should use exponential notation for amounts exceeding 999999999.99', 
+           'exponential format (e.g., 1.10e+9)', displayText);
+
+    // Test rendering at boundary (exactly 999999999.99)
+    RenderModule.renderBalance([
+      { id: '1', itemName: 'Test', amount: 999999999.99, category: 'Food', timestamp: '2024-01-01' }
+    ]);
+    displayText = document.getElementById('balance-amount').textContent;
+    assert(displayText === '$999999999.99', 
+           'should use standard format for amounts at boundary (999999999.99)', 
+           '$999999999.99', displayText);
+
+    // Test rendering with multiple transactions
+    RenderModule.renderBalance([
+      { id: '1', itemName: 'Test1', amount: 10.50, category: 'Food', timestamp: '2024-01-01' },
+      { id: '2', itemName: 'Test2', amount: 20.30, category: 'Transport', timestamp: '2024-01-02' },
+      { id: '3', itemName: 'Test3', amount: 5.20, category: 'Fun', timestamp: '2024-01-03' }
+    ]);
+    displayText = document.getElementById('balance-amount').textContent;
+    assert(displayText === '$36.00', 
+           'should display correct sum of multiple transactions', 
+           '$36.00', displayText);
+
+    // Display summary
+    const summary = document.getElementById('summary');
+    summary.className = 'summary ' + (failedTests === 0 ? 'all-pass' : 'has-fail');
+    summary.innerHTML = `
+      <strong>Test Summary:</strong><br>
+      Total Tests: ${totalTests}<br>
+      Passed: ${passedTests}<br>
+      Failed: ${failedTests}<br>
+      ${failedTests === 0 ? '✓ All tests passed!' : '✗ Some tests failed'}
+    `;
+  </script>
+</body>
+</html>

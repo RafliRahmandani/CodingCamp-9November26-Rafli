@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Validation Module Tests</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    h1 {
+      color: #333;
+      border-bottom: 3px solid #4A90E2;
+      padding-bottom: 10px;
+    }
+    h2 {
+      color: #555;
+      margin-top: 30px;
+      border-bottom: 2px solid #ccc;
+      padding-bottom: 5px;
+    }
+    .test-group {
+      background: white;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .test-result {
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 3px;
+    }
+    .pass {
+      background-color: #d4edda;
+      color: #155724;
+      border-left: 4px solid #28a745;
+    }
+    .fail {
+      background-color: #f8d7da;
+      color: #721c24;
+      border-left: 4px solid #dc3545;
+    }
+    .summary {
+      margin-top: 30px;
+      padding: 20px;
+      background: white;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .summary.all-pass {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    .summary.has-fail {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+  </style>
+</head>
+<body>
+  <h1>ValidationModule Tests</h1>
+  <div id="test-results"></div>
+  <div id="summary"></div>
+
+  <script>
+    // Include the ValidationModule code
+    const ValidationModule = {
+      validateItemName(value) {
+        if (value === null || value === undefined || value === '') {
+          return { valid: false, message: 'Item Name is required' };
+        }
+        
+        if (typeof value === 'string' && value.trim() === '') {
+          return { 
+            valid: false, 
+            message: 'Item Name must contain non-whitespace characters' 
+          };
+        }
+        
+        if (value.length > 100) {
+          return { 
+            valid: false, 
+            message: 'Item Name must not exceed 100 characters' 
+          };
+        }
+        
+        return { valid: true, message: '' };
+      },
+      
+      validateAmount(value) {
+        if (value === null || value === undefined || value === '') {
+          return { valid: false, message: 'Amount is required' };
+        }
+        
+        const numValue = parseFloat(value);
+        if (isNaN(numValue)) {
+          return { valid: false, message: 'Amount must be a number' };
+        }
+        
+        if (numValue < 0.01) {
+          return { 
+            valid: false, 
+            message: 'Amount must be at least 0.01' 
+          };
+        }
+        
+        if (numValue > 999999.99) {
+          return { 
+            valid: false, 
+            message: 'Amount must not exceed 999999.99' 
+          };
+        }
+        
+        return { valid: true, message: '' };
+      },
+      
+      validateCategory(value) {
+        const validCategories = ['Food', 'Transport', 'Fun'];
+        
+        if (value === null || value === undefined || value === '') {
+          return { valid: false, message: 'Category is required' };
+        }
+        
+        const trimmedValue = typeof value === 'string' ? value.trim() : value;
+        if (trimmedValue === '') {
+          return { valid: false, message: 'Category is required' };
+        }
+        
+        if (!validCategories.includes(value)) {
+          return { 
+            valid: false, 
+            message: 'Category must be Food, Transport, or Fun' 
+          };
+        }
+        
+        return { valid: true, message: '' };
+      },
+      
+      validateForm(formData) {
+        const errors = {};
+        
+        const itemNameResult = this.validateItemName(formData.itemName);
+        if (!itemNameResult.valid) {
+          errors.itemName = itemNameResult.message;
+        }
+        
+        const amountResult = this.validateAmount(formData.amount);
+        if (!amountResult.valid) {
+          errors.amount = amountResult.message;
+        }
+        
+        const categoryResult = this.validateCategory(formData.category);
+        if (!categoryResult.valid) {
+          errors.category = categoryResult.message;
+        }
+        
+        return {
+          valid: Object.keys(errors).length === 0,
+          errors: errors
+        };
+      }
+    };
+
+    // Test framework
+    let totalTests = 0;
+    let passedTests = 0;
+    let failedTests = 0;
+    const resultsContainer = document.getElementById('test-results');
+
+    function assert(condition, testName, expected, actual) {
+      totalTests++;
+      const result = document.createElement('div');
+      result.className = 'test-result';
+      
+      if (condition) {
+        passedTests++;
+        result.classList.add('pass');
+        result.textContent = `✓ ${testName}`;
+      } else {
+        failedTests++;
+        result.classList.add('fail');
+        result.textContent = `✗ ${testName} - Expected: ${JSON.stringify(expected)}, Got: ${JSON.stringify(actual)}`;
+      }
+      
+      resultsContainer.appendChild(result);
+    }
+
+    function testGroup(title) {
+      const group = document.createElement('div');
+      group.className = 'test-group';
+      const heading = document.createElement('h2');
+      heading.textContent = title;
+      resultsContainer.appendChild(heading);
+    }
+
+    // Run tests
+    testGroup('validateItemName Tests');
+
+    // Test empty values
+    let result = ValidationModule.validateItemName(null);
+    assert(!result.valid && result.message === 'Item Name is required', 
+           'should reject null value', 
+           { valid: false, message: 'Item Name is required' }, result);
+
+    result = ValidationModule.validateItemName(undefined);
+    assert(!result.valid && result.message === 'Item Name is required', 
+           'should reject undefined value', 
+           { valid: false, message: 'Item Name is required' }, result);
+
+    result = ValidationModule.validateItemName('');
+    assert(!result.valid && result.message === 'Item Name is required', 
+           'should reject empty string', 
+           { valid: false, message: 'Item Name is required' }, result);
+
+    // Test whitespace-only values
+    result = ValidationModule.validateItemName('   ');
+    assert(!result.valid && result.message === 'Item Name must contain non-whitespace characters', 
+           'should reject whitespace-only string', 
+           { valid: false, message: 'Item Name must contain non-whitespace characters' }, result);
+
+    result = ValidationModule.validateItemName('\t\n  ');
+    assert(!result.valid && result.message === 'Item Name must contain non-whitespace characters', 
+           'should reject tabs and newlines', 
+           { valid: false, message: 'Item Name must contain non-whitespace characters' }, result);
+
+    // Test length validation
+    result = ValidationModule.validateItemName('a'.repeat(101));
+    assert(!result.valid && result.message === 'Item Name must not exceed 100 characters', 
+           'should reject strings longer than 100 characters', 
+           { valid: false, message: 'Item Name must not exceed 100 characters' }, result);
+
+    result = ValidationModule.validateItemName('a'.repeat(100));
+    assert(result.valid && result.message === '', 
+           'should accept strings with exactly 100 characters', 
+           { valid: true, message: '' }, result);
+
+    // Test valid values
+    result = ValidationModule.validateItemName('Groceries');
+    assert(result.valid && result.message === '', 
+           'should accept valid item name', 
+           { valid: true, message: '' }, result);
+
+    result = ValidationModule.validateItemName('a');
+    assert(result.valid && result.message === '', 
+           'should accept single character', 
+           { valid: true, message: '' }, result);
+
+    testGroup('validateAmount Tests');
+
+    // Test missing values
+    result = ValidationModule.validateAmount(null);
+    assert(!result.valid && result.message === 'Amount is required', 
+           'should reject null value', 
+           { valid: false, message: 'Amount is required' }, result);
+
+    result = ValidationModule.validateAmount(undefined);
+    assert(!result.valid && result.message === 'Amount is required', 
+           'should reject undefined value', 
+           { valid: false, message: 'Amount is required' }, result);
+
+    result = ValidationModule.validateAmount('');
+    assert(!result.valid && result.message === 'Amount is required', 
+           'should reject empty string', 
+           { valid: false, message: 'Amount is required' }, result);
+
+    // Test non-numeric values
+    result = ValidationModule.validateAmount('abc');
+    assert(!result.valid && result.message === 'Amount must be a number', 
+           'should reject non-numeric string', 
+           { valid: false, message: 'Amount must be a number' }, result);
+
+    result = ValidationModule.validateAmount('12.34.56');
+    assert(!result.valid && result.message === 'Amount must be a number', 
+           'should reject invalid number format', 
+           { valid: false, message: 'Amount must be a number' }, result);
+
+    // Test minimum value
+    result = ValidationModule.validateAmount(0);
+    assert(!result.valid && result.message === 'Amount must be at least 0.01', 
+           'should reject zero', 
+           { valid: false, message: 'Amount must be at least 0.01' }, result);
+
+    result = ValidationModule.validateAmount(0.001);
+    assert(!result.valid && result.message === 'Amount must be at least 0.01', 
+           'should reject values less than 0.01', 
+           { valid: false, message: 'Amount must be at least 0.01' }, result);
+
+    result = ValidationModule.validateAmount(-5);
+    assert(!result.valid && result.message === 'Amount must be at least 0.01', 
+           'should reject negative values', 
+           { valid: false, message: 'Amount must be at least 0.01' }, result);
+
+    result = ValidationModule.validateAmount(0.01);
+    assert(result.valid && result.message === '', 
+           'should accept minimum valid value 0.01', 
+           { valid: true, message: '' }, result);
+
+    // Test maximum value
+    result = ValidationModule.validateAmount(1000000);
+    assert(!result.valid && result.message === 'Amount must not exceed 999999.99', 
+           'should reject values greater than 999999.99', 
+           { valid: false, message: 'Amount must not exceed 999999.99' }, result);
+
+    result = ValidationModule.validateAmount(999999.99);
+    assert(result.valid && result.message === '', 
+           'should accept maximum valid value 999999.99', 
+           { valid: true, message: '' }, result);
+
+    // Test valid values
+    result = ValidationModule.validateAmount(50);
+    assert(result.valid && result.message === '', 
+           'should accept valid integer', 
+           { valid: true, message: '' }, result);
+
+    result = ValidationModule.validateAmount('45.67');
+    assert(result.valid && result.message === '', 
+           'should accept valid decimal as string', 
+           { valid: true, message: '' }, result);
+
+    result = ValidationModule.validateAmount(123.456);
+    assert(result.valid && result.message === '', 
+           'should accept valid decimal with multiple decimal places', 
+           { valid: true, message: '' }, result);
+
+    testGroup('validateCategory Tests');
+
+    // Test empty values
+    result = ValidationModule.validateCategory(null);
+    assert(!result.valid && result.message === 'Category is required', 
+           'should reject null value', 
+           { valid: false, message: 'Category is required' }, result);
+
+    result = ValidationModule.validateCategory(undefined);
+    assert(!result.valid && result.message === 'Category is required', 
+           'should reject undefined value', 
+           { valid: false, message: 'Category is required' }, result);
+
+    result = ValidationModule.validateCategory('');
+    assert(!result.valid && result.message === 'Category is required', 
+           'should reject empty string', 
+           { valid: false, message: 'Category is required' }, result);
+
+    result = ValidationModule.validateCategory('   ');
+    assert(!result.valid && result.message === 'Category is required', 
+           'should reject whitespace-only string', 
+           { valid: false, message: 'Category is required' }, result);
+
+    // Test invalid categories
+    result = ValidationModule.validateCategory('Shopping');
+    assert(!result.valid && result.message === 'Category must be Food, Transport, or Fun', 
+           'should reject invalid category', 
+           { valid: false, message: 'Category must be Food, Transport, or Fun' }, result);
+
+    result = ValidationModule.validateCategory('food');
+    assert(!result.valid && result.message === 'Category must be Food, Transport, or Fun', 
+           'should be case-sensitive (reject lowercase)', 
+           { valid: false, message: 'Category must be Food, Transport, or Fun' }, result);
+
+    // Test valid categories
+    result = ValidationModule.validateCategory('Food');
+    assert(result.valid && result.message === '', 
+           'should accept Food category', 
+           { valid: true, message: '' }, result);
+
+    result = ValidationModule.validateCategory('Transport');
+    assert(result.valid && result.message === '', 
+           'should accept Transport category', 
+           { valid: true, message: '' }, result);
+
+    result = ValidationModule.validateCategory('Fun');
+    assert(result.valid && result.message === '', 
+           'should accept Fun category', 
+           { valid: true, message: '' }, result);
+
+    testGroup('validateForm Tests');
+
+    // Test all valid fields
+    result = ValidationModule.validateForm({
+      itemName: 'Groceries',
+      amount: 45.67,
+      category: 'Food'
+    });
+    assert(result.valid && Object.keys(result.errors).length === 0, 
+           'should return valid for all valid fields', 
+           { valid: true, errors: {} }, result);
+
+    // Test all invalid fields
+    result = ValidationModule.validateForm({
+      itemName: '',
+      amount: '',
+      category: ''
+    });
+    assert(!result.valid && 
+           result.errors.itemName === 'Item Name is required' &&
+           result.errors.amount === 'Amount is required' &&
+           result.errors.category === 'Category is required', 
+           'should return errors for all invalid fields', 
+           { valid: false, errors: { itemName: 'Item Name is required', amount: 'Amount is required', category: 'Category is required' } }, 
+           result);
+
+    // Test partial validation errors
+    result = ValidationModule.validateForm({
+      itemName: 'Valid Name',
+      amount: -5,
+      category: 'Food'
+    });
+    assert(!result.valid && 
+           result.errors.amount === 'Amount must be at least 0.01' &&
+           !result.errors.itemName &&
+           !result.errors.category, 
+           'should return error only for invalid amount', 
+           { valid: false, errors: { amount: 'Amount must be at least 0.01' } }, 
+           result);
+
+    result = ValidationModule.validateForm({
+      itemName: '   ',
+      amount: 50,
+      category: 'InvalidCategory'
+    });
+    assert(!result.valid && 
+           result.errors.itemName === 'Item Name must contain non-whitespace characters' &&
+           result.errors.category === 'Category must be Food, Transport, or Fun' &&
+           !result.errors.amount, 
+           'should return errors for itemName and category', 
+           { valid: false, errors: { itemName: 'Item Name must contain non-whitespace characters', category: 'Category must be Food, Transport, or Fun' } }, 
+           result);
+
+    // Display summary
+    const summary = document.getElementById('summary');
+    summary.className = 'summary ' + (failedTests === 0 ? 'all-pass' : 'has-fail');
+    summary.innerHTML = `
+      <strong>Test Summary:</strong><br>
+      Total Tests: ${totalTests}<br>
+      Passed: ${passedTests}<br>
+      Failed: ${failedTests}<br>
+      ${failedTests === 0 ? '✓ All tests passed!' : '✗ Some tests failed'}
+    `;
+  </script>
+</body>
+</html>

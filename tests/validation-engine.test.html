@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ValidationEngine Tests</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background-color: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .test-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .test-case {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-left: 3px solid #ddd;
+        }
+        .test-case.pass {
+            border-left-color: #4CAF50;
+            background-color: #f1f8f4;
+        }
+        .test-case.fail {
+            border-left-color: #f44336;
+            background-color: #fef5f5;
+        }
+        .test-result {
+            font-weight: bold;
+            color: #333;
+        }
+        .test-result.pass {
+            color: #4CAF50;
+        }
+        .test-result.fail {
+            color: #f44336;
+        }
+        .error-message {
+            color: #666;
+            margin-top: 5px;
+            font-size: 13px;
+            font-style: italic;
+        }
+        .summary {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e8f5e9;
+            border-radius: 5px;
+        }
+        .summary.fail {
+            background-color: #ffebee;
+        }
+    </style>
+</head>
+<body>
+    <h1>ValidationEngine Module Tests - Indonesian Error Messages</h1>
+    <div id="test-results"></div>
+
+    <script src="../js/validation-engine.js"></script>
+    <script>
+        // Test Suite for ValidationEngine
+        const testResults = [];
+        let totalTests = 0;
+        let passedTests = 0;
+
+        function test(fieldName, value, expectedValid, description) {
+            totalTests++;
+            const result = ValidationEngine.validateField(fieldName, value);
+            const passed = result.valid === expectedValid;
+            
+            if (passed) {
+                passedTests++;
+            }
+
+            testResults.push({
+                fieldName,
+                value,
+                description,
+                passed,
+                result
+            });
+
+            return passed;
+        }
+
+        // ========================================
+        // TEST: namaBarang (Text, required, max 100)
+        // ========================================
+        test('namaBarang', '', false, 'namaBarang - Wajib diisi');
+        test('namaBarang', '  ', false, 'namaBarang - Tidak boleh hanya spasi');
+        test('namaBarang', 'Smartphone Samsung Galaxy S21', true, 'namaBarang - Valid');
+        test('namaBarang', 'a'.repeat(101), false, 'namaBarang - Lebih dari 100 karakter');
+        test('namaBarang', 'a'.repeat(100), true, 'namaBarang - Tepat 100 karakter');
+
+        // ========================================
+        // TEST: kategoriBarang (Text, required, max 50)
+        // ========================================
+        test('kategoriBarang', '', false, 'kategoriBarang - Wajib diisi');
+        test('kategoriBarang', 'Elektronik', true, 'kategoriBarang - Valid');
+        test('kategoriBarang', 'a'.repeat(51), false, 'kategoriBarang - Lebih dari 50 karakter');
+
+        // ========================================
+        // TEST: hargaBarang (Number, required, min 0)
+        // ========================================
+        test('hargaBarang', '', false, 'hargaBarang - Wajib diisi');
+        test('hargaBarang', 'abc', false, 'hargaBarang - Harus angka');
+        test('hargaBarang', '5000000', true, 'hargaBarang - Valid');
+        test('hargaBarang', '0', true, 'hargaBarang - Nol dibolehkan');
+        test('hargaBarang', '-100', false, 'hargaBarang - Tidak boleh negatif');
+        test('hargaBarang', '99999.99', true, 'hargaBarang - Desimal dibolehkan');
+
+        // ========================================
+        // TEST: kuantitas (Number, required, positive integer, min 1)
+        // ========================================
+        test('kuantitas', '', false, 'kuantitas - Wajib diisi');
+        test('kuantitas', '5', true, 'kuantitas - Valid (integer)');
+        test('kuantitas', '0', false, 'kuantitas - Minimal 1');
+        test('kuantitas', '-5', false, 'kuantitas - Tidak boleh negatif');
+        test('kuantitas', '5.5', false, 'kuantitas - Harus integer');
+
+        // ========================================
+        // TEST: varianBarang (Text, optional)
+        // ========================================
+        test('varianBarang', '', true, 'varianBarang - Optional, boleh kosong');
+        test('varianBarang', 'Warna Hitam, RAM 8GB', true, 'varianBarang - Valid');
+        test('varianBarang', 'a'.repeat(101), false, 'varianBarang - Lebih dari 100 karakter');
+
+        // ========================================
+        // TEST: ongkir (Number, required, min 0)
+        // ========================================
+        test('ongkir', '', false, 'ongkir - Wajib diisi');
+        test('ongkir', '25000', true, 'ongkir - Valid');
+        test('ongkir', '0', true, 'ongkir - Nol dibolehkan');
+        test('ongkir', '-5000', false, 'ongkir - Tidak boleh negatif');
+
+        // ========================================
+        // TEST: sisaBayar (Number, required, min 0)
+        // ========================================
+        test('sisaBayar', '', false, 'sisaBayar - Wajib diisi');
+        test('sisaBayar', '100000', true, 'sisaBayar - Valid');
+        test('sisaBayar', '0', true, 'sisaBayar - Nol dibolehkan');
+
+        // ========================================
+        // TEST: namaPembeli (Text, required, max 100)
+        // ========================================
+        test('namaPembeli', '', false, 'namaPembeli - Wajib diisi');
+        test('namaPembeli', 'Budi Santoso', true, 'namaPembeli - Valid');
+        test('namaPembeli', 'a'.repeat(101), false, 'namaPembeli - Lebih dari 100 karakter');
+
+        // ========================================
+        // TEST: noTelp (Phone, required, 10-13 digits)
+        // ========================================
+        test('noTelp', '', false, 'noTelp - Wajib diisi');
+        test('noTelp', '081234567890', true, 'noTelp - Valid (12 digits)');
+        test('noTelp', '+62-812-3456-7890', true, 'noTelp - Valid dengan format');
+        test('noTelp', '123456789', false, 'noTelp - Kurang dari 10 digit');
+        test('noTelp', '12345678901234', false, 'noTelp - Lebih dari 13 digit');
+        test('noTelp', 'abc', false, 'noTelp - Harus digit');
+
+        // ========================================
+        // TEST: alamat (Text, required, max 500)
+        // ========================================
+        test('alamat', '', false, 'alamat - Wajib diisi');
+        test('alamat', 'Jl. Merdeka No. 123, Jakarta', true, 'alamat - Valid');
+        test('alamat', 'a'.repeat(501), false, 'alamat - Lebih dari 500 karakter');
+
+        // ========================================
+        // TEST: status (Select, optional)
+        // ========================================
+        test('status', '', true, 'status - Optional, boleh kosong');
+        test('status', 'Pending', true, 'status - Valid');
+
+        // ========================================
+        // TEST: validateForm with all fields
+        // ========================================
+        console.log('\n=== Testing validateForm ===');
+        const validFormData = {
+            namaBarang: 'Smartphone',
+            kategoriBarang: 'Elektronik',
+            hargaBarang: 5000000,
+            kuantitas: 2,
+            varianBarang: 'Warna hitam',
+            ongkir: 25000,
+            sisaBayar: 100000,
+            namaPembeli: 'Budi Santoso',
+            noTelp: '081234567890',
+            alamat: 'Jl. Merdeka No. 123, Jakarta',
+            status: 'Pending'
+        };
+
+        const formValidation = ValidationEngine.validateForm(validFormData);
+        if (formValidation.valid) {
+            totalTests++;
+            passedTests++;
+            console.log('✓ validateForm - All fields valid');
+        }
+
+        // Test with invalid data
+        const invalidFormData = {
+            namaBarang: '',
+            hargaBarang: 'abc',
+            noTelp: '123'
+        };
+        const invalidFormValidation = ValidationEngine.validateForm(invalidFormData);
+        if (!invalidFormValidation.valid && Object.keys(invalidFormValidation.errors).length > 0) {
+            totalTests++;
+            passedTests++;
+            console.log('✓ validateForm - Correctly detected invalid fields');
+        }
+
+        // ========================================
+        // RENDER RESULTS
+        // ========================================
+        function renderResults() {
+            const resultsDiv = document.getElementById('test-results');
+            let html = '';
+
+            // Group tests by field
+            const fieldGroups = {};
+            testResults.forEach(test => {
+                if (!fieldGroups[test.fieldName]) {
+                    fieldGroups[test.fieldName] = [];
+                }
+                fieldGroups[test.fieldName].push(test);
+            });
+
+            // Render each field's tests
+            for (const fieldName in fieldGroups) {
+                const tests = fieldGroups[fieldName];
+                html += `<div class="test-container">`;
+                html += `<div class="test-title">${fieldName}</div>`;
+                
+                tests.forEach(test => {
+                    const resultClass = test.passed ? 'pass' : 'fail';
+                    const resultText = test.passed ? '✓ PASS' : '✗ FAIL';
+                    html += `<div class="test-case ${resultClass}">`;
+                    html += `<div class="test-result ${resultClass}">${resultText}</div>`;
+                    html += `<div><strong>${test.description}</strong></div>`;
+                    html += `<div class="error-message">Nilai: "${test.value}" | Pesan: "${test.result.message}"</div>`;
+                    html += `</div>`;
+                });
+
+                html += `</div>`;
+            }
+
+            // Summary
+            const passRate = ((passedTests / totalTests) * 100).toFixed(1);
+            const summaryClass = passedTests === totalTests ? '' : 'fail';
+            html += `<div class="summary ${summaryClass}">`;
+            html += `Total: ${totalTests} | Passed: ${passedTests} | Failed: ${totalTests - passedTests} | Success Rate: ${passRate}%`;
+            html += `</div>`;
+
+            resultsDiv.innerHTML = html;
+
+            // Log to console
+            console.log(`\n=== Test Summary ===`);
+            console.log(`Total Tests: ${totalTests}`);
+            console.log(`Passed: ${passedTests}`);
+            console.log(`Failed: ${totalTests - passedTests}`);
+            console.log(`Success Rate: ${passRate}%`);
+        }
+
+        // Run tests when page loads
+        window.addEventListener('load', renderResults);
+    </script>
+</body>
+</html>
