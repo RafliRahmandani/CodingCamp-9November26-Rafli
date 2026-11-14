@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DashboardManager Module Verification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .verification-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .console-output {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            max-height: 600px;
+            overflow-y: auto;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        .status-good {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .status-bad {
+            color: #d32f2f;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>DashboardManager Module Verification</h1>
+    
+    <div class="verification-container">
+        <h2>What This Test Verifies</h2>
+        <ul>
+            <li>✓ DashboardManager module loads without errors</li>
+            <li>✓ All 4 required calculation methods exist and are callable</li>
+            <li>✓ renderKPIs() and refreshData() methods exist</li>
+            <li>✓ Methods return Promises (async functions)</li>
+            <li>✓ Methods return correct data types (numbers)</li>
+            <li>✓ Module follows IIFE pattern for encapsulation</li>
+            <li>✓ Currency formatting uses CalculationEngine</li>
+            <li>✓ Data is loaded from CustomerManager</li>
+        </ul>
+    </div>
+    
+    <div class="verification-container">
+        <h2>Verification Output</h2>
+        <div class="console-output" id="verification-output">
+            <p>Loading verification...</p>
+        </div>
+    </div>
+
+    <!-- Storage API (required dependency) -->
+    <script src="../js/storage-api.js"></script>
+    
+    <!-- Calculation Engine (required dependency) -->
+    <script src="../js/calculation-engine.js"></script>
+    
+    <!-- Customer Manager (required dependency) -->
+    <script src="../js/customer-manager.js"></script>
+    
+    <!-- Dashboard Manager (module being verified) -->
+    <script src="../js/dashboard-manager.js"></script>
+    
+    <!-- Verification Script -->
+    <script src="verify-dashboard-manager.js"></script>
+    
+    <script>
+        // Capture console output
+        const outputDiv = document.getElementById('verification-output');
+        let outputContent = '';
+        
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        function captureOutput(message, style = '') {
+            const escapedMessage = message
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+            
+            outputContent += `<div ${style ? `style="${style}"` : ''}>${escapedMessage}</div>`;
+            outputDiv.innerHTML = outputContent;
+            outputDiv.scrollTop = outputDiv.scrollHeight;
+        }
+        
+        // Override console.log to capture styled output
+        console.log = function(...args) {
+            let styles = '';
+            const messages = [];
+            
+            args.forEach((arg, index) => {
+                if (typeof arg === 'string' && arg.startsWith('%c')) {
+                    // Styled log
+                    styles = args[index + 1] || '';
+                    messages.push(arg.substring(2));
+                } else if (typeof arg === 'string') {
+                    messages.push(arg);
+                } else if (typeof arg === 'object') {
+                    messages.push(JSON.stringify(arg, null, 2));
+                } else {
+                    messages.push(String(arg));
+                }
+            });
+            
+            const message = messages.join(' ');
+            
+            // Apply styles if present
+            let htmlStyle = '';
+            if (styles) {
+                if (styles.includes('green')) {
+                    htmlStyle = 'color: #4CAF50; font-weight: bold;';
+                } else if (styles.includes('red')) {
+                    htmlStyle = 'color: #d32f2f; font-weight: bold;';
+                }
+            }
+            
+            captureOutput(message, htmlStyle ? `style="${htmlStyle}"` : '');
+            originalLog.apply(console, args);
+        };
+        
+        console.error = function(...args) {
+            const message = args.join(' ');
+            captureOutput(message, 'style="color: #d32f2f;"');
+            originalError.apply(console, args);
+        };
+        
+        console.warn = function(...args) {
+            const message = args.join(' ');
+            captureOutput(message, 'style="color: #f57c00;"');
+            originalWarn.apply(console, args);
+        };
+    </script>
+</body>
+</html>

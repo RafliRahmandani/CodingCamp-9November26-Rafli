@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NavigationManager Tests</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: white;
+            border-radius: 5px;
+            border-left: 4px solid #4CAF50;
+        }
+        .test-section.failed {
+            border-left-color: #f44336;
+        }
+        .test-section.passed {
+            border-left-color: #4CAF50;
+        }
+        h1 {
+            color: #333;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 3px;
+        }
+        .test-result.pass {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        .test-result.fail {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        .nav-menu {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            gap: 10px;
+        }
+        .nav-link {
+            padding: 8px 12px;
+            cursor: pointer;
+            text-decoration: none;
+            color: #333;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            transition: all 0.3s;
+        }
+        .nav-link.active {
+            background-color: #4CAF50;
+            color: white;
+            border-color: #45a049;
+        }
+        .section {
+            padding: 20px;
+            border: 1px solid #ddd;
+            margin: 10px 0;
+            background-color: #fafafa;
+            display: none;
+        }
+        .section.visible {
+            display: block;
+        }
+        #dashboard {
+            display: none;
+        }
+        #dashboard.visible {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>NavigationManager Module Tests</h1>
+    
+    <!-- Test Dashboard -->
+    <div id="test-dashboard">
+        <h2>Navigation Test Interface</h2>
+        
+        <!-- Navigation Menu -->
+        <nav>
+            <ul class="nav-menu">
+                <li><a href="#/" data-route="/" class="nav-link">Dashboard</a></li>
+                <li><a href="#/form" data-route="/form" class="nav-link">Transaksi</a></li>
+                <li><a href="#/search" data-route="/search" class="nav-link">Pencarian</a></li>
+                <li><a href="#/analytics" data-route="/analytics" class="nav-link">Analitik</a></li>
+            </ul>
+        </nav>
+
+        <!-- Test Sections -->
+        <div id="dashboard" class="section">
+            <h3>Dashboard Section</h3>
+            <p>This is the dashboard section.</p>
+        </div>
+        
+        <div id="transaksi" class="section">
+            <h3>Transaksi Section</h3>
+            <p>This is the transaction entry section.</p>
+        </div>
+        
+        <div id="pencarian" class="section">
+            <h3>Pencarian Section</h3>
+            <p>This is the search section.</p>
+        </div>
+        
+        <div id="analitik" class="section">
+            <h3>Analitik Section</h3>
+            <p>This is the analytics section.</p>
+        </div>
+    </div>
+
+    <!-- Test Results -->
+    <div id="test-results">
+        <h2>Test Results</h2>
+        <div id="results-container"></div>
+        <button onclick="runAllTests()" class="btn" style="margin-top: 20px; padding: 10px 20px; background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            Run All Tests
+        </button>
+    </div>
+
+    <!-- Load NavigationManager -->
+    <script src="../js/navigation-manager.js"></script>
+
+    <script>
+        // Test results tracking
+        const testResults = [];
+        
+        function logTest(name, passed, message = '') {
+            testResults.push({ name, passed, message });
+            const resultsContainer = document.getElementById('results-container');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${passed ? 'pass' : 'fail'}`;
+            resultDiv.textContent = `${passed ? '✓ PASS' : '✗ FAIL'}: ${name}${message ? ' - ' + message : ''}`;
+            resultsContainer.appendChild(resultDiv);
+        }
+        
+        function testNavigationManagerExists() {
+            try {
+                const exists = typeof NavigationManager !== 'undefined';
+                logTest('NavigationManager module exists', exists, exists ? '' : 'Module not defined');
+                return exists;
+            } catch (e) {
+                logTest('NavigationManager module exists', false, e.message);
+                return false;
+            }
+        }
+        
+        function testPublicAPI() {
+            try {
+                const hasNavigateTo = typeof NavigationManager.navigateTo === 'function';
+                const hasGetCurrentRoute = typeof NavigationManager.getCurrentRoute === 'function';
+                const hasInit = typeof NavigationManager.init === 'function';
+                
+                logTest('navigateTo method exists', hasNavigateTo);
+                logTest('getCurrentRoute method exists', hasGetCurrentRoute);
+                logTest('init method exists', hasInit);
+                
+                return hasNavigateTo && hasGetCurrentRoute && hasInit;
+            } catch (e) {
+                logTest('Public API exists', false, e.message);
+                return false;
+            }
+        }
+        
+        function testInitialization() {
+            try {
+                // Clean up hash
+                window.location.hash = '';
+                
+                // Initialize
+                NavigationManager.init();
+                
+                // Check current route
+                const currentRoute = NavigationManager.getCurrentRoute();
+                const isCorrect = currentRoute === '/';
+                
+                logTest('Initialization sets default route to /', isCorrect, 
+                    `Current route: ${currentRoute}`);
+                return isCorrect;
+            } catch (e) {
+                logTest('Initialization works', false, e.message);
+                return false;
+            }
+        }
+        
+        function testNavigationToDashboard() {
+            try {
+                const result = NavigationManager.navigateTo('/');
+                const isSuccess = result === true;
+                
+                logTest('navigateTo(/) succeeds', isSuccess);
+                return isSuccess;
+            } catch (e) {
+                logTest('navigateTo(/) works', false, e.message);
+                return false;
+            }
+        }
+        
+        function testNavigationToTransaksi() {
+            try {
+                const result = NavigationManager.navigateTo('/form');
+                const isSuccess = result === true;
+                
+                logTest('navigateTo(/form) succeeds', isSuccess);
+                return isSuccess;
+            } catch (e) {
+                logTest('navigateTo(/form) works', false, e.message);
+                return false;
+            }
+        }
+        
+        function testNavigationToPencarian() {
+            try {
+                const result = NavigationManager.navigateTo('/search');
+                const isSuccess = result === true;
+                
+                logTest('navigateTo(/search) succeeds', isSuccess);
+                return isSuccess;
+            } catch (e) {
+                logTest('navigateTo(/search) works', false, e.message);
+                return false;
+            }
+        }
+        
+        function testNavigationToAnalitik() {
+            try {
+                const result = NavigationManager.navigateTo('/analytics');
+                const isSuccess = result === true;
+                
+                logTest('navigateTo(/analytics) succeeds', isSuccess);
+                return isSuccess;
+            } catch (e) {
+                logTest('navigateTo(/analytics) works', false, e.message);
+                return false;
+            }
+        }
+        
+        function testInvalidRoute() {
+            try {
+                const result = NavigationManager.navigateTo('/invalid');
+                const isFalse = result === false;
+                
+                logTest('navigateTo(/invalid) returns false', isFalse);
+                return isFalse;
+            } catch (e) {
+                logTest('navigateTo(/invalid) handles properly', false, e.message);
+                return false;
+            }
+        }
+        
+        function testGetCurrentRoute() {
+            try {
+                NavigationManager.navigateTo('/');
+                const route = NavigationManager.getCurrentRoute();
+                const isCorrect = route === '/';
+                
+                logTest('getCurrentRoute() returns correct route', isCorrect, 
+                    `Route: ${route}`);
+                return isCorrect;
+            } catch (e) {
+                logTest('getCurrentRoute() works', false, e.message);
+                return false;
+            }
+        }
+        
+        function testSectionVisibility() {
+            try {
+                // Navigate to transaksi
+                NavigationManager.navigateTo('/form');
+                
+                // Wait a bit for hash change to process
+                return setTimeout(() => {
+                    const transaksiSection = document.getElementById('transaksi');
+                    const dashboardSection = document.getElementById('dashboard');
+                    
+                    if (transaksiSection && dashboardSection) {
+                        const transaksiVisible = transaksiSection.style.display !== 'none';
+                        const dashboardHidden = dashboardSection.style.display === 'none';
+                        
+                        logTest('Transaksi section visible after navigation', transaksiVisible);
+                        logTest('Other sections hidden after navigation', dashboardHidden);
+                        return transaksiVisible && dashboardHidden;
+                    } else {
+                        logTest('Section visibility test', false, 'Sections not found in DOM');
+                        return false;
+                    }
+                }, 100);
+            } catch (e) {
+                logTest('Section visibility works', false, e.message);
+                return false;
+            }
+        }
+        
+        function testNavigationLinkActiveState() {
+            try {
+                NavigationManager.navigateTo('/');
+                
+                setTimeout(() => {
+                    const navLinks = document.querySelectorAll('[data-route]');
+                    const dashboardLink = document.querySelector('[data-route="/"]');
+                    const formLink = document.querySelector('[data-route="/form"]');
+                    
+                    if (dashboardLink && formLink) {
+                        const dashboardActive = dashboardLink.classList.contains('active');
+                        const formNotActive = !formLink.classList.contains('active');
+                        
+                        logTest('Dashboard link has active class', dashboardActive);
+                        logTest('Other links do not have active class', formNotActive);
+                        return dashboardActive && formNotActive;
+                    } else {
+                        logTest('Navigation links active state', false, 'Links not found in DOM');
+                        return false;
+                    }
+                }, 100);
+            } catch (e) {
+                logTest('Navigation links active state works', false, e.message);
+                return false;
+            }
+        }
+        
+        function testHashBasedRouting() {
+            try {
+                // Set hash directly
+                window.location.hash = '#/analytics';
+                
+                setTimeout(() => {
+                    const currentRoute = NavigationManager.getCurrentRoute();
+                    const isCorrect = currentRoute === '/analytics';
+                    
+                    logTest('Hash-based routing works', isCorrect, 
+                        `Current route from hash: ${currentRoute}`);
+                    return isCorrect;
+                }, 100);
+            } catch (e) {
+                logTest('Hash-based routing works', false, e.message);
+                return false;
+            }
+        }
+        
+        function testFallbackToDefaultRoute() {
+            try {
+                // Set invalid hash
+                window.location.hash = '#/nonexistent';
+                
+                setTimeout(() => {
+                    const currentRoute = NavigationManager.getCurrentRoute();
+                    // Should fallback to default route
+                    const isDefault = currentRoute === '/' || currentRoute === '/nonexistent';
+                    
+                    logTest('Falls back to valid route on invalid hash', isDefault, 
+                        `Route after invalid hash: ${currentRoute}`);
+                    return isDefault;
+                }, 100);
+            } catch (e) {
+                logTest('Fallback to default route works', false, e.message);
+                return false;
+            }
+        }
+        
+        function runAllTests() {
+            testResults.length = 0; // Clear previous results
+            document.getElementById('results-container').innerHTML = '';
+            
+            console.log('Starting NavigationManager tests...');
+            
+            testNavigationManagerExists();
+            testPublicAPI();
+            
+            // Small delay before initialization test
+            setTimeout(() => {
+                testInitialization();
+                testNavigationToDashboard();
+                testNavigationToTransaksi();
+                testNavigationToPencarian();
+                testNavigationToAnalitik();
+                testInvalidRoute();
+                testGetCurrentRoute();
+                testSectionVisibility();
+                testNavigationLinkActiveState();
+                testHashBasedRouting();
+                testFallbackToDefaultRoute();
+                
+                // Summary
+                const passed = testResults.filter(r => r.passed).length;
+                const total = testResults.length;
+                const summary = document.createElement('div');
+                summary.style.marginTop = '20px';
+                summary.style.padding = '15px';
+                summary.style.backgroundColor = passed === total ? '#e8f5e9' : '#ffebee';
+                summary.style.borderRadius = '5px';
+                summary.style.fontWeight = 'bold';
+                summary.textContent = `Test Summary: ${passed}/${total} tests passed`;
+                
+                document.getElementById('results-container').appendChild(summary);
+                
+                console.log(`Tests completed: ${passed}/${total} passed`);
+            }, 500);
+        }
+        
+        // Auto-run tests when page loads
+        window.addEventListener('load', () => {
+            console.log('Page loaded, running tests...');
+            runAllTests();
+        });
+    </script>
+</body>
+</html>

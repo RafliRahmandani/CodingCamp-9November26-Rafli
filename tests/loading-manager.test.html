@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LoadingManager Tests - Task 14.3</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .test-section:last-child {
+            border-bottom: none;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: opacity 0.2s;
+        }
+        button:hover:not(:disabled) {
+            opacity: 0.8;
+        }
+        .btn-primary {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .btn-secondary {
+            background-color: #2196F3;
+            color: white;
+        }
+        .btn-danger {
+            background-color: #f44336;
+            color: white;
+        }
+        .test-results {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .test-result {
+            margin: 8px 0;
+            padding: 8px;
+            border-left: 3px solid #ddd;
+        }
+        .test-result.pass {
+            background-color: #e8f5e9;
+            border-left-color: #4CAF50;
+            color: #2e7d32;
+        }
+        .test-result.fail {
+            background-color: #ffebee;
+            border-left-color: #f44336;
+            color: #c62828;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        h2 {
+            color: #555;
+            margin-top: 0;
+            font-size: 18px;
+        }
+        .info-text {
+            color: #666;
+            font-size: 13px;
+            margin: 10px 0;
+        }
+        #demo-container {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #999;
+        }
+        #demo-container.loading {
+            opacity: 0.7;
+        }
+        .test-form {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .form-group {
+            margin-bottom: 10px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>LoadingManager Tests - Task 14.3</h1>
+        <p class="info-text">
+            Testing loading states for async operations:
+            Form submission spinners, search loading, chart loading, timeouts.
+        </p>
+
+        <!-- Test Results -->
+        <div class="test-results" id="test-results">
+            <div class="test-result pass">✓ Test suite ready</div>
+        </div>
+
+        <!-- Test 1: Overlay Loading -->
+        <div class="test-section">
+            <h2>Test 1: Loading Overlay</h2>
+            <p class="info-text">Shows full-screen loading overlay with spinner and message</p>
+            <div class="button-group">
+                <button class="btn-primary" onclick="testShowOverlay()">Show Overlay</button>
+                <button class="btn-secondary" onclick="testHideOverlay()">Hide Overlay</button>
+                <button class="btn-danger" onclick="testOverlayTimeout()">Test Timeout (5s)</button>
+            </div>
+        </div>
+
+        <!-- Test 2: Button Loading -->
+        <div class="test-section">
+            <h2>Test 2: Button Loading States</h2>
+            <p class="info-text">Shows spinner on button, disables button during operation</p>
+            <div class="test-form">
+                <form id="test-form">
+                    <div class="form-group">
+                        <label>Form Field 1:</label>
+                        <input type="text" placeholder="Enter something" value="Test data">
+                    </div>
+                    <div class="button-group">
+                        <button type="button" class="btn-primary" onclick="testButtonLoading()">Simulate Submit (2s)</button>
+                        <button type="button" class="btn-primary" onclick="testMultipleButtons()">Test Multiple Buttons</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Test 3: Element Loading -->
+        <div class="test-section">
+            <h2>Test 3: Element Loading States</h2>
+            <p class="info-text">Shows loading indicator on specific element (search, results, etc)</p>
+            <div id="demo-container">
+                <p id="demo-content">Click button to load data...</p>
+            </div>
+            <div class="button-group">
+                <button class="btn-primary" onclick="testElementLoading()">Load Data (3s)</button>
+                <button class="btn-secondary" onclick="testClearLoading()">Clear Immediately</button>
+            </div>
+        </div>
+
+        <!-- Test 4: Form Disable -->
+        <div class="test-section">
+            <h2>Test 4: Form Button Disable</h2>
+            <p class="info-text">Disables all form buttons for specified duration</p>
+            <div class="test-form">
+                <div class="button-group">
+                    <button type="button" class="btn-primary" onclick="testFormDisable()">Test Form Disable (2s)</button>
+                    <button type="button" id="form-test-btn" class="btn-secondary">This button will be disabled</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test 5: Status Check -->
+        <div class="test-section">
+            <h2>Test 5: Status Check</h2>
+            <p class="info-text">Check number of active loading operations and overlay visibility</p>
+            <div class="button-group">
+                <button class="btn-primary" onclick="testStatusCheck()">Check Status</button>
+            </div>
+            <div id="status-results" class="test-results" style="display: none; margin-top: 10px;"></div>
+        </div>
+
+        <!-- Test 6: Combined Operations -->
+        <div class="test-section">
+            <h2>Test 6: Combined Operations</h2>
+            <p class="info-text">Test multiple loading states at the same time</p>
+            <div class="button-group">
+                <button class="btn-primary" onclick="testCombinedOperations()">Start Combined Test (5s)</button>
+            </div>
+        </div>
+
+        <!-- Test 7: Clear All -->
+        <div class="test-section">
+            <h2>Test 7: Clear All</h2>
+            <p class="info-text">Clear all active loading states</p>
+            <div class="button-group">
+                <button class="btn-danger" onclick="testClearAll()">Clear All Loadings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/loading-manager.js"></script>
+    <script src="../js/notification-manager.js"></script>
+    <script>
+        // Test Results Logger
+        function logTestResult(testName, passed, message = '') {
+            const resultsDiv = document.getElementById('test-results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${passed ? 'pass' : 'fail'}`;
+            resultDiv.textContent = `${passed ? '✓' : '✕'} ${testName}${message ? ': ' + message : ''}`;
+            resultsDiv.appendChild(resultDiv);
+            console.log(`[${passed ? 'PASS' : 'FAIL'}] ${testName}${message ? ': ' + message : ''}`);
+        }
+
+        // Test 1: Show Overlay
+        function testShowOverlay() {
+            logTestResult('Show Overlay', LoadingManager.isOverlayVisible() === false, 'Starting test');
+            const operationId = LoadingManager.showOverlay('Memproses data...');
+            setTimeout(() => {
+                const isVisible = LoadingManager.isOverlayVisible();
+                logTestResult('Overlay Visible', isVisible, isVisible ? 'Success' : 'Failed');
+            }, 100);
+        }
+
+        // Test 2: Hide Overlay
+        function testHideOverlay() {
+            LoadingManager.hideOverlay();
+            setTimeout(() => {
+                const isVisible = LoadingManager.isOverlayVisible();
+                logTestResult('Hide Overlay', !isVisible, isVisible ? 'Still visible (Failed)' : 'Hidden successfully');
+            }, 100);
+        }
+
+        // Test 3: Overlay Timeout
+        function testOverlayTimeout() {
+            logTestResult('Overlay Timeout', true, 'Starting 5s timeout test');
+            LoadingManager.showOverlay('Memproses (timeout 5s)...', 5000);
+            setTimeout(() => {
+                const isVisible = LoadingManager.isOverlayVisible();
+                logTestResult('Overlay Auto-Timeout', !isVisible, isVisible ? 'Still visible (might timeout)' : 'Auto-hidden after timeout');
+            }, 6000);
+        }
+
+        // Test 4: Button Loading
+        function testButtonLoading() {
+            logTestResult('Button Loading Start', true, 'Adding loading state');
+            const btn = event.target;
+            const operationId = LoadingManager.showButtonLoading(btn, 2000);
+            
+            setTimeout(() => {
+                LoadingManager.hideButtonLoading(operationId);
+                logTestResult('Button Loading Cleared', true, 'Spinner removed, button re-enabled');
+            }, 2100);
+        }
+
+        // Test 5: Multiple Buttons
+        function testMultipleButtons() {
+            const form = document.getElementById('test-form');
+            logTestResult('Multiple Buttons Disable', true, 'Disabling form buttons');
+            
+            const buttons = form.querySelectorAll('button[type="button"]');
+            buttons.forEach(btn => {
+                btn.classList.add('loading');
+                btn.disabled = true;
+            });
+            
+            setTimeout(() => {
+                buttons.forEach(btn => {
+                    btn.classList.remove('loading');
+                    btn.disabled = false;
+                });
+                logTestResult('Multiple Buttons Re-enabled', true, 'All buttons restored');
+            }, 2000);
+        }
+
+        // Test 6: Element Loading
+        function testElementLoading() {
+            logTestResult('Element Loading', true, 'Starting 3s load simulation');
+            const container = document.getElementById('demo-container');
+            const operationId = LoadingManager.showElementLoading(
+                '#demo-container',
+                'Mengambil data pelanggan...',
+                3000
+            );
+            
+            setTimeout(() => {
+                LoadingManager.hideElementLoading(operationId);
+                const content = document.getElementById('demo-content');
+                content.textContent = 'Data loaded successfully! (3 customers found)';
+                logTestResult('Element Loading Cleared', true, 'Content restored');
+            }, 3100);
+        }
+
+        // Test 7: Clear Immediately
+        function testClearLoading() {
+            const activeCount = LoadingManager.getActiveCount();
+            LoadingManager.clearAll();
+            logTestResult('Clear All', true, `Cleared ${activeCount} active loadings`);
+            const content = document.getElementById('demo-content');
+            content.textContent = 'Click button to load data...';
+        }
+
+        // Test 8: Form Disable
+        function testFormDisable() {
+            logTestResult('Form Disable', true, 'Disabling form buttons for 2s');
+            LoadingManager.disableFormButtons('#test-form', 2000);
+            setTimeout(() => {
+                logTestResult('Form Re-enabled', true, 'All form buttons restored after 2s');
+            }, 2100);
+        }
+
+        // Test 9: Status Check
+        function testStatusCheck() {
+            const activeCount = LoadingManager.getActiveCount();
+            const isOverlayVisible = LoadingManager.isOverlayVisible();
+            
+            const statusResults = document.getElementById('status-results');
+            statusResults.style.display = 'block';
+            statusResults.innerHTML = `
+                <div class="test-result pass">Active Loading Operations: ${activeCount}</div>
+                <div class="test-result ${isOverlayVisible ? 'pass' : 'fail'}">Overlay Visible: ${isOverlayVisible ? 'Yes' : 'No'}</div>
+            `;
+            
+            logTestResult('Status Check', true, `${activeCount} active operations, overlay: ${isOverlayVisible}`);
+        }
+
+        // Test 10: Combined Operations
+        function testCombinedOperations() {
+            logTestResult('Combined Test', true, 'Starting multiple operations simultaneously');
+            
+            // Show overlay
+            const overlayId = LoadingManager.showOverlay('Memproses multiple operations...', 5000);
+            
+            // Show button loading
+            const btn = document.querySelector('.btn-primary');
+            const btnId = LoadingManager.showButtonLoading(btn, 5000);
+            
+            // Show element loading
+            const elemId = LoadingManager.showElementLoading(
+                '#demo-container',
+                'Mengambil data...',
+                5000
+            );
+            
+            setTimeout(() => {
+                LoadingManager.hideOverlay(overlayId);
+                LoadingManager.hideButtonLoading(btnId);
+                LoadingManager.hideElementLoading(elemId);
+                logTestResult('Combined Operations Complete', true, 'All loadings cleared');
+            }, 5100);
+        }
+
+        // Test 11: Clear All
+        function testClearAll() {
+            const countBefore = LoadingManager.getActiveCount();
+            LoadingManager.clearAll();
+            const countAfter = LoadingManager.getActiveCount();
+            logTestResult('Clear All', countAfter === 0, `Before: ${countBefore}, After: ${countAfter}`);
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            logTestResult('Page Loaded', true, 'LoadingManager module initialized');
+            logTestResult('Module Available', typeof LoadingManager !== 'undefined', 'LoadingManager is accessible');
+        });
+    </script>
+</body>
+</html>

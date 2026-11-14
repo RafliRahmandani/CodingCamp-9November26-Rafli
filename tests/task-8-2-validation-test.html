@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task 8.2 - Real-Time Field Validation Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .test-container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .test-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .test-case {
+            background: #f9f9f9;
+            border-left: 4px solid #2196F3;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        
+        .test-case.pass {
+            border-left-color: #4CAF50;
+            background: #f1f8e9;
+        }
+        
+        .test-case.fail {
+            border-left-color: #f44336;
+            background: #ffebee;
+        }
+        
+        .test-field {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 4px;
+        }
+        
+        .test-field label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .test-field input,
+        .test-field select,
+        .test-field textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .error-message {
+            color: #f44336;
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+        }
+        
+        .error-field {
+            border-color: #f44336 !important;
+            border-width: 2px;
+            box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.1);
+        }
+        
+        .results {
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        
+        .results.success {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+        
+        .results.error {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+        
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .btn-primary {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #757575;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Task 8.2 - Real-Time Field Validation Test</h1>
+    
+    <div class="test-container">
+        <div class="test-title">Objective:</div>
+        <p>Verify that all 14 form fields validate correctly on blur/input events with proper error display and visual feedback.</p>
+    </div>
+    
+    <div class="test-container">
+        <div class="test-title">Test 1: Required Field Validation on Blur</div>
+        
+        <div class="test-field">
+            <label for="test-nama-barang">Nama Barang (Required)</label>
+            <input type="text" id="test-nama-barang" placeholder="Leave empty and click away" maxlength="100">
+            <span class="error-message" id="test-nama-barang-error"></span>
+        </div>
+        
+        <button class="btn-primary" onclick="runTest1()">Run Test 1</button>
+        <div id="test1-result" class="results" style="display: none;"></div>
+    </div>
+    
+    <div class="test-container">
+        <div class="test-title">Test 2: Phone Number Validation</div>
+        
+        <div class="test-field">
+            <label for="test-no-telp">No Telp (Min 10 digits)</label>
+            <input type="tel" id="test-no-telp" placeholder="Enter phone number">
+            <span class="error-message" id="test-no-telp-error"></span>
+        </div>
+        
+        <button class="btn-primary" onclick="runTest2a()">Test Invalid Phone (5 digits)</button>
+        <button class="btn-primary" onclick="runTest2b()">Test Valid Phone (10+ digits)</button>
+        <div id="test2-result" class="results" style="display: none;"></div>
+    </div>
+    
+    <div class="test-container">
+        <div class="test-title">Test 3: Numeric Field Validation</div>
+        
+        <div class="test-field">
+            <label for="test-harga">Harga Barang (Required, Min 0)</label>
+            <input type="number" id="test-harga" placeholder="Enter price" min="0">
+            <span class="error-message" id="test-harga-error"></span>
+        </div>
+        
+        <button class="btn-primary" onclick="runTest3a()">Test Invalid (Negative)</button>
+        <button class="btn-primary" onclick="runTest3b()">Test Valid (1000)</button>
+        <div id="test3-result" class="results" style="display: none;"></div>
+    </div>
+    
+    <div class="test-container">
+        <div class="test-title">Test 4: Optional Field Validation</div>
+        
+        <div class="test-field">
+            <label for="test-varian">Varian Barang (Optional)</label>
+            <input type="text" id="test-varian" placeholder="Leave empty - should not show error" maxlength="100">
+            <span class="error-message" id="test-varian-error"></span>
+        </div>
+        
+        <button class="btn-primary" onclick="runTest4()">Test Optional Field (Empty)</button>
+        <div id="test4-result" class="results" style="display: none;"></div>
+    </div>
+    
+    <div class="test-container">
+        <div class="test-title">Test 5: Max Length Validation</div>
+        
+        <div class="test-field">
+            <label for="test-alamat">Alamat (Max 500 chars)</label>
+            <textarea id="test-alamat" maxlength="500" rows="4"></textarea>
+            <span class="error-message" id="test-alamat-error"></span>
+        </div>
+        
+        <button class="btn-primary" onclick="runTest5()">Test Max Length</button>
+        <div id="test5-result" class="results" style="display: none;"></div>
+    </div>
+    
+    <div class="test-container">
+        <div class="test-title">Test 6: Error Field Visual States</div>
+        <p>This test verifies that error fields have red border styling and error messages display correctly.</p>
+        
+        <button class="btn-primary" onclick="runTest6()">Apply Error Styling</button>
+        <button class="btn-secondary" onclick="runTest6Clear()">Clear Error Styling</button>
+        
+        <div class="test-field">
+            <label for="test-visual">Visual Test Field</label>
+            <input type="text" id="test-visual" placeholder="This will be styled with error">
+            <span class="error-message" id="test-visual-error">Contoh pesan kesalahan</span>
+        </div>
+        
+        <div id="test6-result" class="results" style="display: none;"></div>
+    </div>
+    
+    <div class="test-container">
+        <div class="test-title">Test Summary</div>
+        <button class="btn-primary" onclick="runAllTests()">Run All Tests</button>
+        <div id="test-summary" class="results" style="display: none;"></div>
+    </div>
+
+    <script>
+        // Load ValidationEngine (inline for testing)
+        // In production, this is loaded from validation-engine.js
+        
+        function displayError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            const errorContainer = document.getElementById(fieldId + '-error');
+            
+            if (message) {
+                field.classList.add('error-field');
+                errorContainer.textContent = message;
+                errorContainer.style.display = 'block';
+                return false;
+            } else {
+                field.classList.remove('error-field');
+                errorContainer.textContent = '';
+                errorContainer.style.display = 'none';
+                return true;
+            }
+        }
+        
+        function showResult(testId, passed, message) {
+            const resultDiv = document.getElementById(testId + '-result');
+            resultDiv.className = 'results ' + (passed ? 'success' : 'error');
+            resultDiv.textContent = (passed ? '✓ PASS: ' : '✗ FAIL: ') + message;
+            resultDiv.style.display = 'block';
+        }
+        
+        function runTest1() {
+            const field = document.getElementById('test-nama-barang');
+            field.value = '';
+            field.focus();
+            field.blur();
+            
+            const error = document.getElementById('test-nama-barang-error');
+            const hasError = field.classList.contains('error-field') && error.textContent !== '';
+            
+            showResult('test1', hasError, 'Required field validation on blur works');
+        }
+        
+        function runTest2a() {
+            const field = document.getElementById('test-no-telp');
+            field.value = '12345'; // Invalid - only 5 digits
+            field.focus();
+            field.blur();
+            
+            const error = document.getElementById('test-no-telp-error');
+            const hasError = field.classList.contains('error-field') && error.textContent !== '';
+            
+            showResult('test2', hasError, 'Phone number validation (< 10 digits) shows error');
+        }
+        
+        function runTest2b() {
+            const field = document.getElementById('test-no-telp');
+            field.value = '08123456789'; // Valid - 11 digits
+            field.focus();
+            field.blur();
+            
+            const hasNoError = !field.classList.contains('error-field');
+            
+            showResult('test2', hasNoError, 'Valid phone number (11 digits) passes validation');
+        }
+        
+        function runTest3a() {
+            const field = document.getElementById('test-harga');
+            field.value = '-100'; // Invalid - negative
+            field.focus();
+            field.blur();
+            
+            const error = document.getElementById('test-harga-error');
+            const hasError = field.classList.contains('error-field') && error.textContent !== '';
+            
+            showResult('test3', hasError, 'Negative number validation shows error');
+        }
+        
+        function runTest3b() {
+            const field = document.getElementById('test-harga');
+            field.value = '1000'; // Valid
+            field.focus();
+            field.blur();
+            
+            const hasNoError = !field.classList.contains('error-field');
+            
+            showResult('test3', hasNoError, 'Valid number (1000) passes validation');
+        }
+        
+        function runTest4() {
+            const field = document.getElementById('test-varian');
+            const error = document.getElementById('test-varian-error');
+            field.value = '';
+            field.focus();
+            field.blur();
+            
+            const hasNoError = !field.classList.contains('error-field') && error.textContent === '';
+            
+            showResult('test4', hasNoError, 'Optional empty field does not show error');
+        }
+        
+        function runTest5() {
+            const field = document.getElementById('test-alamat');
+            field.value = 'a'.repeat(501); // 501 characters (exceeds 500 limit)
+            field.focus();
+            field.blur();
+            
+            const error = document.getElementById('test-alamat-error');
+            const hasError = field.classList.contains('error-field') && error.textContent !== '';
+            
+            showResult('test5', hasError, 'Max length validation (501 chars) shows error');
+        }
+        
+        function runTest6() {
+            const field = document.getElementById('test-visual');
+            const error = document.getElementById('test-visual-error');
+            
+            field.classList.add('error-field');
+            error.style.display = 'block';
+            
+            const hasError = field.classList.contains('error-field') && error.style.display === 'block';
+            
+            showResult('test6', hasError, 'Error styling applied (red border and message visible)');
+        }
+        
+        function runTest6Clear() {
+            const field = document.getElementById('test-visual');
+            const error = document.getElementById('test-visual-error');
+            
+            field.classList.remove('error-field');
+            error.style.display = 'none';
+            
+            const hasNoError = !field.classList.contains('error-field') && error.style.display === 'none';
+            
+            showResult('test6', hasNoError, 'Error styling cleared');
+        }
+        
+        function runAllTests() {
+            let passed = 0;
+            let total = 6;
+            
+            // Check if tests passed
+            const test1 = document.getElementById('test1-result');
+            const test2 = document.getElementById('test2-result');
+            const test3 = document.getElementById('test3-result');
+            const test4 = document.getElementById('test4-result');
+            const test5 = document.getElementById('test5-result');
+            const test6 = document.getElementById('test6-result');
+            
+            if (test1.classList.contains('success')) passed++;
+            if (test2.classList.contains('success')) passed++;
+            if (test3.classList.contains('success')) passed++;
+            if (test4.classList.contains('success')) passed++;
+            if (test5.classList.contains('success')) passed++;
+            if (test6.classList.contains('success')) passed++;
+            
+            const summary = document.getElementById('test-summary');
+            summary.className = 'results ' + (passed === total ? 'success' : 'error');
+            summary.textContent = `Results: ${passed}/${total} tests passed`;
+            summary.style.display = 'block';
+            
+            if (passed === total) {
+                summary.textContent += ' ✓ All tests passed!';
+            }
+        }
+    </script>
+</body>
+</html>

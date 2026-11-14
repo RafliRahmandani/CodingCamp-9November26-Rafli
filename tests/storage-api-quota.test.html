@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Storage API Quota Error Handling Tests</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+
+        h1 {
+            color: #1976d2;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .test-section {
+            margin-bottom: 40px;
+        }
+
+        .test-section h2 {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #1976d2;
+            padding-bottom: 10px;
+        }
+
+        .test-result {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+
+        .test-result.passed {
+            background-color: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            color: #2e7d32;
+        }
+
+        .test-result.failed {
+            background-color: #ffebee;
+            border-left: 4px solid #f44336;
+            color: #c62828;
+        }
+
+        .test-result.running {
+            background-color: #fff3e0;
+            border-left: 4px solid #ff9800;
+            color: #e65100;
+        }
+
+        .test-result.skipped {
+            background-color: #f3f3f3;
+            border-left: 4px solid #9e9e9e;
+            color: #616161;
+        }
+
+        .test-icon {
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+
+        .summary {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .summary-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .summary-value {
+            font-weight: bold;
+        }
+
+        .passed-value {
+            color: #4caf50;
+        }
+
+        .failed-value {
+            color: #f44336;
+        }
+
+        .total-value {
+            color: #1976d2;
+        }
+
+        .run-button {
+            background-color: #1976d2;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .run-button:hover {
+            background-color: #1565c0;
+        }
+
+        .run-button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .clear-button {
+            background-color: #757575;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .clear-button:hover {
+            background-color: #616161;
+        }
+
+        .button-group {
+            margin-bottom: 20px;
+        }
+
+        .error-detail {
+            background-color: #fff3cd;
+            border-left: 4px solid #ff9800;
+            padding: 12px;
+            margin-top: 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #856404;
+            display: none;
+        }
+
+        .test-result.failed .error-detail {
+            display: block;
+        }
+
+        .notification-mock {
+            background-color: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 12px;
+            margin-top: 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #0d47a1;
+        }
+
+        .loader {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid #666;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 0.6s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Test: LocalStorage Quota Error Handling</h1>
+        <div class="subtitle">Validates Task 14.2 - QuotaExceededError handling with user-friendly notifications</div>
+
+        <div class="button-group">
+            <button class="run-button" onclick="runTests()">▶ Jalankan Semua Test</button>
+            <button class="clear-button" onclick="clearResults()">🗑 Bersihkan Hasil</button>
+        </div>
+
+        <div id="test-results" class="test-section">
+            <h2>Hasil Test</h2>
+            <div style="color: #999;">Klik "Jalankan Semua Test" untuk memulai</div>
+        </div>
+
+        <div class="summary" id="summary" style="display: none;">
+            <div class="summary-row">
+                <span>Total Test:</span>
+                <span class="summary-value total-value" id="total-count">0</span>
+            </div>
+            <div class="summary-row">
+                <span>Berhasil:</span>
+                <span class="summary-value passed-value" id="passed-count">0</span>
+            </div>
+            <div class="summary-row">
+                <span>Gagal:</span>
+                <span class="summary-value failed-value" id="failed-count">0</span>
+            </div>
+            <div class="summary-row">
+                <span>Status:</span>
+                <span class="summary-value" id="status">-</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load required modules -->
+    <script src="../js/notification-manager.js"></script>
+    <script src="../js/storage-api.js"></script>
+    <script src="storage-api-quota.test.js"></script>
+
+    <script>
+        async function runTests() {
+            const resultsContainer = document.getElementById('test-results');
+            const summary = document.getElementById('summary');
+            const runButton = document.querySelector('.run-button');
+
+            // Clear previous results
+            resultsContainer.innerHTML = '<h2>Hasil Test</h2>';
+            runButton.disabled = true;
+            runButton.innerHTML = '<span class="loader"></span> Menjalankan...';
+
+            // Allow UI to update
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            const results = [];
+            const tests = [];
+
+            // Collect all test functions
+            StorageAPIQuotaTests.test = function(name, fn) {
+                tests.push({ name, fn });
+            };
+
+            // Re-register tests
+            StorageAPIQuotaTests.runAll = function() {
+                console.log('\n====================================');
+                console.log('StorageAPI Quota Error Handling Tests');
+                console.log('====================================\n');
+
+                tests.forEach((test) => {
+                    try {
+                        test.fn();
+                        results.push({ name: test.name, status: 'passed', error: null });
+                        console.log(`✓ ${test.name}`);
+                    } catch (error) {
+                        results.push({ name: test.name, status: 'failed', error: error.message });
+                        console.error(`✗ ${test.name}`);
+                        console.error(`  ${error.message}\n`);
+                    }
+                });
+
+                return results;
+            };
+
+            // Manually run tests (since we modified the test registration)
+            const testResults = [];
+
+            // Test 1: QuotaExceededError is caught
+            try {
+                const originalSetItem = localStorage.setItem;
+                localStorage.setItem = function() {
+                    const error = new Error('QuotaExceededError');
+                    error.name = 'QuotaExceededError';
+                    throw error;
+                };
+
+                const result = await StorageAPI.setItem('test-key', { test: 'data' });
+                if (result && typeof result === 'object' && result.error === 'QuotaExceededError') {
+                    testResults.push({ name: 'QuotaExceededError adalah caught dan tidak thrown', status: 'passed' });
+                } else {
+                    testResults.push({ name: 'QuotaExceededError adalah caught dan tidak thrown', status: 'failed', error: 'Error object not properly returned' });
+                }
+
+                localStorage.setItem = originalSetItem;
+            } catch (e) {
+                testResults.push({ name: 'QuotaExceededError adalah caught dan tidak thrown', status: 'failed', error: 'Exception thrown - app would crash' });
+            }
+
+            // Test 2: User-friendly notification is shown
+            try {
+                const originalSetItem = localStorage.setItem;
+                localStorage.setItem = function() {
+                    const error = new Error('QuotaExceededError');
+                    error.name = 'QuotaExceededError';
+                    throw error;
+                };
+
+                NotificationManager.lastError = null;
+                await StorageAPI.setItem('test-key', { test: 'data' });
+
+                if (NotificationManager.lastError && 
+                    NotificationManager.lastError.message.includes('Penyimpanan penuh') &&
+                    NotificationManager.lastError.message.includes('CSV')) {
+                    testResults.push({ name: 'Indonesian error notification ditampilkan dengan saran CSV', status: 'passed' });
+                } else {
+                    testResults.push({ name: 'Indonesian error notification ditampilkan dengan saran CSV', status: 'failed', error: 'Notification not properly shown' });
+                }
+
+                localStorage.setItem = originalSetItem;
+            } catch (e) {
+                testResults.push({ name: 'Indonesian error notification ditampilkan dengan saran CSV', status: 'failed', error: e.message });
+            }
+
+            // Test 3: Usage information in return
+            try {
+                const originalSetItem = localStorage.setItem;
+                localStorage.setItem = function() {
+                    const error = new Error('QuotaExceededError');
+                    error.name = 'QuotaExceededError';
+                    throw error;
+                };
+
+                const result = await StorageAPI.setItem('test-key', { test: 'data' });
+                if (result.usage && typeof result.usage.used === 'number' && typeof result.usage.percentUsed === 'number') {
+                    testResults.push({ name: 'Usage information tersedia dalam return value', status: 'passed' });
+                } else {
+                    testResults.push({ name: 'Usage information tersedia dalam return value', status: 'failed', error: 'Usage info missing' });
+                }
+
+                localStorage.setItem = originalSetItem;
+            } catch (e) {
+                testResults.push({ name: 'Usage information tersedia dalam return value', status: 'failed', error: e.message });
+            }
+
+            // Test 4: Normal operations still work
+            try {
+                const testKey = 'test-quota-normal-' + Date.now();
+                const testData = { name: 'Test Data', value: 123 };
+                const result = await StorageAPI.setItem(testKey, testData);
+                
+                if (result === true) {
+                    const retrieved = await StorageAPI.getItem(testKey);
+                    if (retrieved && retrieved.name === testData.name) {
+                        testResults.push({ name: 'Normal setItem masih bekerja ketika quota tidak terlampaui', status: 'passed' });
+                        await StorageAPI.removeItem(testKey);
+                    } else {
+                        testResults.push({ name: 'Normal setItem masih bekerja ketika quota tidak terlampaui', status: 'failed', error: 'Data tidak bisa diambil kembali' });
+                    }
+                } else {
+                    testResults.push({ name: 'Normal setItem masih bekerja ketika quota tidak terlampaui', status: 'failed', error: 'setItem gagal' });
+                }
+            } catch (e) {
+                testResults.push({ name: 'Normal setItem masih bekerja ketika quota tidak terlampaui', status: 'failed', error: e.message });
+            }
+
+            // Test 5: Storage usage calculation
+            try {
+                const usage = StorageAPI.getUsage();
+                if (typeof usage.used === 'number' && typeof usage.percentUsed === 'number' && 
+                    usage.percentUsed >= 0 && usage.percentUsed <= 100 && 
+                    usage.quota === 5 * 1024 * 1024) {
+                    testResults.push({ name: 'Storage usage calculation bekerja dengan benar', status: 'passed' });
+                } else {
+                    testResults.push({ name: 'Storage usage calculation bekerja dengan benar', status: 'failed', error: 'Invalid usage values' });
+                }
+            } catch (e) {
+                testResults.push({ name: 'Storage usage calculation bekerja dengan benar', status: 'failed', error: e.message });
+            }
+
+            // Test 6: isNearQuotaLimit
+            try {
+                const isNear = StorageAPI.isNearQuotaLimit();
+                if (typeof isNear === 'boolean') {
+                    testResults.push({ name: 'isNearQuotaLimit mendeteksi kondisi near-limit', status: 'passed' });
+                } else {
+                    testResults.push({ name: 'isNearQuotaLimit mendeteksi kondisi near-limit', status: 'failed', error: 'Not a boolean' });
+                }
+            } catch (e) {
+                testResults.push({ name: 'isNearQuotaLimit mendeteksi kondisi near-limit', status: 'failed', error: e.message });
+            }
+
+            // Test 7: showQuotaErrorRecovery
+            try {
+                NotificationManager.lastError = null;
+                const recovery = StorageAPI.showQuotaErrorRecovery();
+                if (recovery && typeof recovery.message === 'string' && recovery.message.includes('ekspor') && NotificationManager.lastError) {
+                    testResults.push({ name: 'showQuotaErrorRecovery menyediakan recovery guidance', status: 'passed' });
+                } else {
+                    testResults.push({ name: 'showQuotaErrorRecovery menyediakan recovery guidance', status: 'failed', error: 'Recovery object incomplete' });
+                }
+            } catch (e) {
+                testResults.push({ name: 'showQuotaErrorRecovery menyediakan recovery guidance', status: 'failed', error: e.message });
+            }
+
+            // Test 8: Notification duration
+            try {
+                const originalSetItem = localStorage.setItem;
+                localStorage.setItem = function() {
+                    const error = new Error('QuotaExceededError');
+                    error.name = 'QuotaExceededError';
+                    throw error;
+                };
+
+                NotificationManager.lastError = null;
+                await StorageAPI.setItem('test-key', { test: 'data' });
+
+                if (NotificationManager.lastError && NotificationManager.lastError.duration >= 8000) {
+                    testResults.push({ name: 'Notification duration cukup lama untuk aksi user', status: 'passed' });
+                } else {
+                    testResults.push({ name: 'Notification duration cukup lama untuk aksi user', status: 'failed', error: 'Duration terlalu singkat' });
+                }
+
+                localStorage.setItem = originalSetItem;
+            } catch (e) {
+                testResults.push({ name: 'Notification duration cukup lama untuk aksi user', status: 'failed', error: e.message });
+            }
+
+            // Display results
+            resultsContainer.innerHTML = '<h2>Hasil Test</h2>';
+            testResults.forEach((result) => {
+                const resultDiv = document.createElement('div');
+                resultDiv.className = `test-result ${result.status}`;
+                resultDiv.innerHTML = `
+                    <span class="test-icon">${result.status === 'passed' ? '✓' : '✗'}</span>
+                    <span>${result.name}</span>
+                    ${result.error ? `<div class="error-detail" style="display: block; width: 100%; margin-top: 8px;">Error: ${result.error}</div>` : ''}
+                `;
+                resultsContainer.appendChild(resultDiv);
+            });
+
+            // Display summary
+            const passedCount = testResults.filter(r => r.status === 'passed').length;
+            const failedCount = testResults.filter(r => r.status === 'failed').length;
+
+            document.getElementById('total-count').textContent = testResults.length;
+            document.getElementById('passed-count').textContent = passedCount;
+            document.getElementById('failed-count').textContent = failedCount;
+            document.getElementById('status').textContent = failedCount === 0 ? '✓ Semua Berhasil' : '✗ Ada yang Gagal';
+            document.getElementById('status').style.color = failedCount === 0 ? '#4caf50' : '#f44336';
+            summary.style.display = 'block';
+
+            runButton.disabled = false;
+            runButton.innerHTML = '▶ Jalankan Semua Test';
+        }
+
+        function clearResults() {
+            document.getElementById('test-results').innerHTML = '<h2>Hasil Test</h2><div style="color: #999;">Klik "Jalankan Semua Test" untuk memulai</div>';
+            document.getElementById('summary').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

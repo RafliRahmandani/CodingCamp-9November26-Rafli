@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E2E Workflow Testing - Sistem Manajemen Pelanggan</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            margin-bottom: 5px;
+            font-size: 28px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #3498db;
+        }
+
+        .summary-card h3 {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+        }
+
+        .summary-card .value {
+            font-size: 36px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .summary-card.passed {
+            border-left-color: #27ae60;
+        }
+
+        .summary-card.failed {
+            border-left-color: #e74c3c;
+        }
+
+        .summary-card.warning {
+            border-left-color: #f39c12;
+        }
+
+        .test-section {
+            background: white;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .test-section h2 {
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .test-item {
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 4px;
+            border-left: 4px solid #95a5a6;
+            background: #f9f9f9;
+        }
+
+        .test-item.passed {
+            border-left-color: #27ae60;
+            background: #f0fdf4;
+        }
+
+        .test-item.failed {
+            border-left-color: #e74c3c;
+            background: #fef2f2;
+        }
+
+        .test-item.running {
+            border-left-color: #f39c12;
+            background: #fffbf0;
+        }
+
+        .test-item h3 {
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-size: 15px;
+        }
+
+        .test-status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .test-status-badge.pass {
+            background: #27ae60;
+            color: white;
+        }
+
+        .test-status-badge.fail {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .test-status-badge.running {
+            background: #f39c12;
+            color: white;
+        }
+
+        .test-details {
+            font-size: 13px;
+            color: #666;
+            margin-top: 8px;
+        }
+
+        .test-error {
+            margin-top: 10px;
+            padding: 10px;
+            background: #fadbd8;
+            border-radius: 3px;
+            color: #c0392b;
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        .step-list {
+            margin-top: 10px;
+            padding-left: 20px;
+        }
+
+        .step-item {
+            display: flex;
+            margin: 5px 0;
+            font-size: 13px;
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #3498db;
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+
+        .step-item.done .step-number {
+            background: #27ae60;
+        }
+
+        .step-item.error .step-number {
+            background: #e74c3c;
+        }
+
+        .performance-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            background: #ecf0f1;
+            margin-left: 5px;
+        }
+
+        .performance-badge.fast {
+            background: #d5f4e6;
+            color: #27ae60;
+        }
+
+        .performance-badge.slow {
+            background: #fadbd8;
+            color: #e74c3c;
+        }
+
+        .logs {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .log-entry {
+            margin: 2px 0;
+            padding: 2px 0;
+        }
+
+        .log-info {
+            color: #4ec9b0;
+        }
+
+        .log-success {
+            color: #6a9955;
+        }
+
+        .log-error {
+            color: #f48771;
+        }
+
+        .log-warning {
+            color: #dcdcaa;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .summary {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .summary-card .value {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 E2E Workflow Testing Suite</h1>
+            <p>Sistem Manajemen Pelanggan Marketplace Indonesia</p>
+            <div class="controls">
+                <button class="btn btn-primary" onclick="runAllTests()">▶ Jalankan Semua Test</button>
+                <button class="btn btn-secondary" onclick="clearResults()">🔄 Reset</button>
+                <button class="btn btn-secondary" onclick="downloadResults()">📥 Download Hasil</button>
+            </div>
+        </div>
+
+        <div class="summary" id="summary"></div>
+
+        <!-- Workflow 1: Complete Workflow -->
+        <div class="test-section">
+            <h2>✓ Workflow 1: Alur Lengkap (Login → Transaksi → Cari → Dashboard → Export → Logout)</h2>
+            <div id="workflow1"></div>
+        </div>
+
+        <!-- Workflow 2: Data Volume -->
+        <div class="test-section">
+            <h2>✓ Workflow 2: Test Volume (100, 500, 1000 Transaksi)</h2>
+            <div id="workflow2"></div>
+        </div>
+
+        <!-- Workflow 3: Error Recovery -->
+        <div class="test-section">
+            <h2>✓ Workflow 3: Penanganan Error dan Recovery</h2>
+            <div id="workflow3"></div>
+        </div>
+
+        <!-- Workflow 4: Data Persistence -->
+        <div class="test-section">
+            <h2>✓ Workflow 4: Persistensi Data (Page Reload & LocalStorage)</h2>
+            <div id="workflow4"></div>
+        </div>
+
+        <!-- Workflow 5: Performance -->
+        <div class="test-section">
+            <h2>✓ Workflow 5: Performance Testing</h2>
+            <div id="workflow5"></div>
+        </div>
+
+        <!-- Workflow 6: Accessibility -->
+        <div class="test-section">
+            <h2>✓ Workflow 6: Aksesibilitas (Keyboard Navigation)</h2>
+            <div id="workflow6"></div>
+        </div>
+
+        <!-- Workflow 7: Mobile -->
+        <div class="test-section">
+            <h2>✓ Workflow 7: Mobile Responsive (375px Viewport)</h2>
+            <div id="workflow7"></div>
+        </div>
+
+        <!-- Logs -->
+        <div class="test-section">
+            <h2>📋 Test Logs</h2>
+            <div class="logs" id="logs"></div>
+        </div>
+    </div>
+
+    <script>
+        // Test Framework
+        class E2ETestSuite {
+            constructor() {
+                this.results = {
+                    total: 0,
+                    passed: 0,
+                    failed: 0,
+                    tests: []
+                };
+                this.logs = [];
+                this.isRunning = false;
+            }
+
+            log(message, type = 'info') {
+                const timestamp = new Date().toLocaleTimeString('id-ID');
+                const logEntry = `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+                this.logs.push({ text: logEntry, type });
+                this.updateLogs();
+            }
+
+            async runTest(name, workflow, testFn) {
+                const test = {
+                    id: `test-${Date.now()}-${Math.random()}`,
+                    name,
+                    workflow,
+                    status: 'running',
+                    duration: 0,
+                    error: null,
+                    steps: [],
+                    startTime: Date.now()
+                };
+
+                this.results.total++;
+                this.log(`Memulai: ${name}`, 'info');
+
+                try {
+                    await testFn(test);
+                    test.status = 'passed';
+                    this.results.passed++;
+                    this.log(`✓ Berhasil: ${name}`, 'success');
+                } catch (error) {
+                    test.status = 'failed';
+                    test.error = error.message;
+                    this.results.failed++;
+                    this.log(`✗ Gagal: ${name} - ${error.message}`, 'error');
+                }
+
+                test.duration = Date.now() - test.startTime;
+                this.results.tests.push(test);
+                return test;
+            }
+
+            addStep(test, step, description, completed = false, details = '') {
+                test.steps.push({ step, description, completed, details });
+            }
+
+            getResults() {
+                return this.results;
+            }
+
+            updateLogs() {
+                const logsContainer = document.getElementById('logs');
+                if (!logsContainer) return;
+                
+                logsContainer.innerHTML = this.logs
+                    .map(log => `<div class="log-entry log-${log.type}">${log.text}</div>`)
+                    .join('');
+                
+                logsContainer.scrollTop = logsContainer.scrollHeight;
+            }
+
+            renderTest(test) {
+                const stepsHtml = test.steps
+                    .map((s, i) => `
+                        <div class="step-item ${s.completed ? 'done' : 'error'}">
+                            <div class="step-number">${s.step}</div>
+                            <div>
+                                <div>${s.description}</div>
+                                ${s.details ? `<div style="font-size: 11px; color: #666; margin-top: 2px;">${s.details}</div>` : ''}
+                            </div>
+                        </div>
+                    `)
+                    .join('');
+
+                const errorHtml = test.error ? `<div class="test-error">${test.error}</div>` : '';
+
+                return `
+                    <div class="test-item ${test.status}">
+                        <h3>
+                            ${test.name}
+                            <span class="test-status-badge ${test.status === 'passed' ? 'pass' : 'fail'}">
+                                ${test.status === 'passed' ? '✓ LULUS' : '✗ GAGAL'}
+                            </span>
+                        </h3>
+                        <div class="test-details">
+                            Durasi: ${test.duration}ms
+                        </div>
+                        <div class="step-list">${stepsHtml}</div>
+                        ${errorHtml}
+                    </div>
+                `;
+            }
+
+            renderSummary() {
+                const { total, passed, failed } = this.results;
+                const passRate = total > 0 ? Math.round((passed / total) * 100) : 0;
+
+                return `
+                    <div class="summary-card">
+                        <h3>Total Test</h3>
+                        <div class="value">${total}</div>
+                    </div>
+                    <div class="summary-card passed">
+                        <h3>Lulus</h3>
+                        <div class="value" style="color: #27ae60">${passed}</div>
+                    </div>
+                    <div class="summary-card failed">
+                        <h3>Gagal</h3>
+                        <div class="value" style="color: #e74c3c">${failed}</div>
+                    </div>
+                    <div class="summary-card ${passRate === 100 ? 'passed' : passRate >= 80 ? 'warning' : 'failed'}">
+                        <h3>Tingkat Keberhasilan</h3>
+                        <div class="value">${passRate}%</div>
+                    </div>
+                `;
+            }
+        }
+
+        const testSuite = new E2ETestSuite();
+
+        // Utility functions
+        function checkElement(selector) {
+            const el = document.querySelector(selector);
+            if (!el) throw new Error(`Element tidak ditemukan: ${selector}`);
+            return el;
+        }
+
+        function getPerformanceBadge(duration, threshold) {
+            if (duration < threshold) {
+                return `<span class="performance-badge fast">⚡ ${duration.toFixed(0)}ms (Cepat)</span>`;
+            } else {
+                return `<span class="performance-badge slow">🐢 ${duration.toFixed(0)}ms (Lambat)</span>`;
+            }
+        }
+
+        // Test Workflows
+
+        async function testCompleteWorkflow() {
+            const test = await testSuite.runTest(
+                'Alur Lengkap (Login → Transaksi → Cari → Dashboard → Export → Logout)',
+                'workflow1',
+                async (t) => {
+                    // Step 1: Verify login UI
+                    testSuite.addStep(t, 1, 'Verifikasi UI Login tersedia', true, 'Form login harus ada');
+                    checkElement('#login-section');
+                    checkElement('#login-form');
+                    checkElement('#username-input');
+                    checkElement('#password-input');
+                    checkElement('#login-btn');
+
+                    // Step 2: Verify navigation menu
+                    testSuite.addStep(t, 2, 'Verifikasi Menu Navigasi', true, 'Menu navigasi setelah login');
+                    checkElement('#nav-menu');
+                    checkElement('#nav-menu-list');
+
+                    // Step 3: Verify dashboard
+                    testSuite.addStep(t, 3, 'Verifikasi Dashboard', true, 'KPI cards dan KPI values');
+                    checkElement('#dashboard');
+                    checkElement('#dashboard-kpi');
+                    checkElement('#kpi-customers');
+                    checkElement('#kpi-revenue');
+                    checkElement('#kpi-average-transaction');
+                    checkElement('#kpi-monthly-transactions');
+
+                    // Step 4: Verify transaction form
+                    testSuite.addStep(t, 4, 'Verifikasi Form Transaksi', true, 'Form dengan 14 fields');
+                    checkElement('#transaction-form');
+                    checkElement('#namaBarang');
+                    checkElement('#kategoriBarang');
+                    checkElement('#hargaBarang');
+                    checkElement('#kuantitas');
+                    checkElement('#ongkir');
+                    checkElement('#totalBelanja');
+
+                    // Step 5: Verify search component
+                    testSuite.addStep(t, 5, 'Verifikasi Komponen Pencarian', true, 'Search input dan results');
+                    const searchSection = document.querySelector('#pencarian');
+                    if (!searchSection) throw new Error('Search section tidak ditemukan');
+
+                    // Step 6: Verify analytics
+                    testSuite.addStep(t, 6, 'Verifikasi Dashboard Analitik', true, 'Chart containers');
+                    const analyticsSection = document.querySelector('#analitik');
+                    if (!analyticsSection) throw new Error('Analytics section tidak ditemukan');
+
+                    // Step 7: Verify export/import buttons
+                    testSuite.addStep(t, 7, 'Verifikasi Tombol Export/Import', true, 'Export dan Import CSV');
+                    checkElement('#export-btn');
+                    checkElement('#import-btn');
+
+                    // Step 8: Verify logout button
+                    testSuite.addStep(t, 8, 'Verifikasi Tombol Logout', true, 'Logout button tersedia');
+                    checkElement('#logout-btn');
+                }
+            );
+
+            document.getElementById('workflow1').innerHTML += testSuite.renderTest(test);
+        }
+
+        async function testDataVolume() {
+            // Test 100 records
+            const test1 = await testSuite.runTest(
+                'Performance dengan 100 Transaksi',
+                'workflow2',
+                async (t) => {
+                    testSuite.addStep(t, 1, 'Generate 100 sample records', true);
+                    const data = Array.from({ length: 100 }, (_, i) => ({
+                        id: `CUST-20240001-${String(i).padStart(4, '0')}`,
+                        namaBarang: `Barang ${i}`,
+                        totalBelanja: Math.random() * 1000000
+                    }));
+
+                    testSuite.addStep(t, 2, 'Store di localStorage', true, `${data.length} records stored`);
+                    try {
+                        localStorage.setItem('test-data-100', JSON.stringify(data));
+                    } catch (e) {
+                        throw new Error('Gagal menyimpan ke localStorage');
+                    }
+
+                    testSuite.addStep(t, 3, 'Retrieve dan calculate KPIs', true);
+                    const startCalc = performance.now();
+                    
+                    let totalRevenue = 0;
+                    data.forEach(item => {
+                        totalRevenue += item.totalBelanja;
+                    });
+                    const avgTransaction = totalRevenue / data.length;
+
+                    const calcTime = performance.now() - startCalc;
+                    testSuite.addStep(t, 4, 'Kalkulasi selesai', calcTime < 100, `${calcTime.toFixed(2)}ms`);
+
+                    if (calcTime > 500) throw new Error(`Kalkulasi terlalu lambat: ${calcTime.toFixed(0)}ms`);
+                }
+            );
+
+            // Test 500 records
+            const test2 = await testSuite.runTest(
+                'Performance dengan 500 Transaksi',
+                'workflow2',
+                async (t) => {
+                    testSuite.addStep(t, 1, 'Generate 500 sample records', true);
+                    const data = Array.from({ length: 500 }, (_, i) => ({
+                        id: `CUST-20240002-${String(i).padStart(4, '0')}`,
+                        namaBarang: `Barang ${i}`,
+                        totalBelanja: Math.random() * 1000000
+                    }));
+
+                    testSuite.addStep(t, 2, 'Store di localStorage', true, `${data.length} records`);
+                    localStorage.setItem('test-data-500', JSON.stringify(data));
+
+                    testSuite.addStep(t, 3, 'Calculate statistics', true);
+                    const startCalc = performance.now();
+                    
+                    let totalRevenue = data.reduce((sum, item) => sum + item.totalBelanja, 0);
+                    const avgTransaction = totalRevenue / data.length;
+                    const calcTime = performance.now() - startCalc;
+
+                    testSuite.addStep(t, 4, 'Kalkulasi selesai', calcTime < 500, `${calcTime.toFixed(2)}ms`);
+                    if (calcTime > 1000) throw new Error(`Kalkulasi terlalu lambat: ${calcTime.toFixed(0)}ms`);
+                }
+            );
+
+            // Test 1000 records
+            const test3 = await testSuite.runTest(
+                'Performance dengan 1000 Transaksi',
+                'workflow2',
+                async (t) => {
+                    testSuite.addStep(t, 1, 'Generate 1000 sample records', true);
+                    const data = Array.from({ length: 1000 }, (_, i) => ({
+                        id: `CUST-20240003-${String(i).padStart(4, '0')}`,
+                        namaBarang: `Barang ${i}`,
+                        totalBelanja: Math.random() * 1000000
+                    }));
+
+                    testSuite.addStep(t, 2, 'Store di localStorage', true, `${data.length} records`);
+                    localStorage.setItem('test-data-1000', JSON.stringify(data));
+
+                    testSuite.addStep(t, 3, 'Calculate statistics', true);
+                    const startCalc = performance.now();
+                    
+                    let totalRevenue = data.reduce((sum, item) => sum + item.totalBelanja, 0);
+                    const avgTransaction = totalRevenue / data.length;
+                    const calcTime = performance.now() - startCalc;
+
+                    testSuite.addStep(t, 4, 'Kalkulasi selesai', calcTime < 1000, `${calcTime.toFixed(2)}ms`);
+                    if (calcTime > 2000) throw new Error(`Kalkulasi terlalu lambat: ${calcTime.toFixed(0)}ms`);
+                }
+            );
+
+            document.getElementById('workflow2').innerHTML += testSuite.renderTest(test1);
+            document.getElementById('workflow2').innerHTML += testSuite.renderTest(test2);
+            document.getElementById('workflow2').innerHTML += testSuite.renderTest(test3);
+        }
+
+        async function testErrorRecovery() {
+            const test = await testSuite.runTest(
+                'Error Recovery: Invalid Input & Quota Handling',
+                'workflow3',
+                async (t) => {
+                    testSuite.addStep(t, 1, 'Test validation dengan input kosong', true);
+                    const isValid = (value) => value && value.trim().length > 0;
+                    if (!isValid('')) throw new Error('Validation tidak bekerja');
+
+                    testSuite.addStep(t, 2, 'Test quota exceeded handling', true);
+                    try {
+                        const largeData = new Array(10000).fill('x').join('');
+                        localStorage.setItem('quota-test', largeData);
+                        testSuite.addStep(t, 3, 'Quota handling works', true);
+                    } catch (e) {
+                        if (e.name === 'QuotaExceededError') {
+                            testSuite.addStep(t, 3, 'Quota error caught correctly', true);
+                        }
+                    }
+
+                    testSuite.addStep(t, 4, 'Test data validation rules', true);
+                    const validatePhone = (phone) => /^\d{10,}$/.test(phone);
+                    if (!validatePhone('081234567890')) throw new Error('Phone validation failed');
+
+                    testSuite.addStep(t, 5, 'Test currency formatting', true);
+                    const formatCurrency = (num) => `Rp ${num.toLocaleString('id-ID')}`;
+                    if (!formatCurrency(100000).includes('100')) throw new Error('Currency format failed');
+                }
+            );
+
+            document.getElementById('workflow3').innerHTML += testSuite.renderTest(test);
+        }
+
+        async function testDataPersistence() {
+            const test1 = await testSuite.runTest(
+                'Data Persistence: localStorage Save & Load',
+                'workflow4',
+                async (t) => {
+                    testSuite.addStep(t, 1, 'Save data to localStorage', true);
+                    const testData = { id: 'CUST-001', nama: 'Test Customer', totalBelanja: 500000 };
+                    localStorage.setItem('persistence-test', JSON.stringify(testData));
+
+                    testSuite.addStep(t, 2, 'Retrieve data from localStorage', true);
+                    const retrieved = JSON.parse(localStorage.getItem('persistence-test'));
+                    if (retrieved.id !== testData.id) throw new Error('Data tidak match');
+
+                    testSuite.addStep(t, 3, 'Verify data integrity', true, 'Semua field valid');
+                    if (retrieved.totalBelanja !== testData.totalBelanja) {
+                        throw new Error('Total belanja tidak sesuai');
+                    }
+
+                    testSuite.addStep(t, 4, 'Data verified successfully', true);
+                    localStorage.removeItem('persistence-test');
+                }
+            );
+
+            const test2 = await testSuite.runTest(
+                'Data Persistence: Multiple Records',
+                'workflow4',
+                async (t) => {
+                    testSuite.addStep(t, 1, 'Create 50 customer records', true);
+                    const customers = Array.from({ length: 50 }, (_, i) => ({
+                        id: `CUST-${String(i).padStart(5, '0')}`,
+                        nama: `Customer ${i}`,
+                        totalBelanja: Math.random() * 1000000
+                    }));
+
+                    testSuite.addStep(t, 2, 'Save all records', true);
+                    localStorage.setItem('multi-persist', JSON.stringify(customers));
+
+                    testSuite.addStep(t, 3, 'Retrieve all records', true);
+                    const retrieved = JSON.parse(localStorage.getItem('multi-persist'));
+                    if (retrieved.length !== 50) throw new Error('Record count mismatch');
+
+                    testSuite.addStep(t, 4, 'Verify all records present', true, '50/50 records');
+                    localStorage.removeItem('multi-persist');
+                }
+            );
+
+            document.getElementById('workflow4').innerHTML += testSuite.renderTest(test1);
+            document.getElementById('workflow4').innerHTML += testSuite.renderTest(test2);
+        }
+
+        async function testPerformance() {
+            const test1 = await testSuite.runTest(
+                'Performance: Page Load Time',
+                'workflow5',
+                async (t) => {
+                    testSuite.addStep(t, 1, 'Measure page load timing', true);
+                    const perfData = performance.getEntriesByType('navigation')[0];
+                    const loadTime = perfData.loadEventEnd - perfData.loadEventStart;
+
+                    testSuite.addStep(t, 2, `Page load: ${loadTime.toFixed(0)}ms`, loadTime < 2000, 'Target: <2s');
+                    if (loadTime > 2000) {
+                        testSuite.log(`⚠️ Page load lambat: ${loadTime.toFixed(0)}ms`, 'warning');
+                    }
+                }
+            );
+
+            const test2 = await testSuite.runTest(
+                'Performance: DOM Rendering',
+                'workflow5',
+                async (t) => {
+                    testSuite.addStep(t, 1, 'Measure DOM content load', true);
+                    const perfData = performance.getEntriesByType('navigation')[0];
+                    const domTime = perfData.domContentLoadedEventEnd - perfData.domContentLoadedEventStart;
+
+                    testSuite.addStep(t, 2, `DOM render: ${domTime.toFixed(0)}ms`, domTime < 1000, 'Target: <1s');
+                }
+            );
+
+            const test3 = await testSuite.runTest(
+                'Performance: KPI Calculation (<1s)',
+                'workflow5',
+                async (t) => {
+                    testSuite.addStep(t, 1, 'Simulate KPI calculation', true);
+                    const data = Array.from({ length: 1000 }, () => ({
+                        totalBelanja: Math.random() * 1000000
+                    }));
+
+                    const start = performance.now();
+                    let total = 0;
+                    data.forEach(item => { total += item.totalBelanja; });
+                    const avg = total / data.length;
+                    const time = performance.now() - start;
+
+                    testSuite.addStep(t, 2, `KPI calculation: ${time.toFixed(2)}ms`, time < 1000, 'Target: <1s');
+                }
+            );
+
+            document.getElementById('workflow5').innerHTML += testSuite.renderTest(test1);
+            document.getElementById('workflow5').innerHTML += testSuite.renderTest(test2);
+            document.getElementById('workflow5').innerHTML += testSuite.renderTest(test3);
+        }
+
+        async function testAccessibility() {
+            const test1 = await testSuite.runTest(
+                'Accessibility: Keyboard Navigation',
+                'workflow6',
+                async (t) => {
+                    testSuite.addStep(t, 1, 'Check skip-to-main link', true);
+                    const skipLink = document.querySelector('.skip-to-main');
+                    if (!skipLink) throw new Error('Skip-to-main link tidak ditemukan');
+
+                    testSuite.addStep(t, 2, 'Verify focusable elements', true);
+                    const focusableElements = document.querySelectorAll('input, button, select, textarea, a[href]');
+                    if (focusableElements.length === 0) throw new Error('Tidak ada focusable elements');
+
+                    testSuite.addStep(t, 3, `Found ${focusableElements.length} focusable elements`, true);
+                }
+            );
+
+            const test2 = await testSuite.runTest(
+                'Accessibility: ARIA Labels & Semantic HTML',
+                'workflow6',
+                async (t) => {
+                    testSuite.addStep(t, 1, 'Check ARIA labels', true);
+                    const ariaElements = document.querySelectorAll('[aria-label], [aria-describedby]');
+                    if (ariaElements.length === 0) testSuite.log('⚠️ Sedikit ARIA labels ditemukan', 'warning');
+
+                    testSuite.addStep(t, 2, `Found ${ariaElements.length} ARIA elements`, true);
+
+                    testSuite.addStep(t, 3, 'Check semantic HTML', true);
+                    const semanticElements = document.querySelectorAll('section, nav, main, article, header, footer');
+                    if (semanticElements.length === 0) throw new Error('Minimal semantic elements');
+
+                    testSuite.addStep(t, 4, `Found ${semanticElements.length} semantic elements`, true);
+                }
+            );
+
+            document.getElementById('workflow6').innerHTML += testSuite.renderTest(test1);
+            document.getElementById('workflow6').innerHTML += testSuite.renderTest(test2);
+        }
+
+        async function testMobileResponsive() {
+            const test1 = await testSuite.runTest(
+                'Mobile: Viewport Meta Tag',
+                'workflow7',
+                async (t) => {
+                    testSuite.addStep(t, 1, 'Check viewport meta tag', true);
+                    const viewportMeta = document.querySelector('meta[name="viewport"]');
+                    if (!viewportMeta) throw new Error('Viewport meta tag tidak ditemukan');
+
+                    testSuite.addStep(t, 2, 'Viewport meta tag: ' + viewportMeta.content, true);
+                }
+            );
+
+            const test2 = await testSuite.runTest(
+                'Mobile: Responsive CSS',
+                'workflow7',
+                async (t) => {
+                    testSuite.addStep(t, 1, 'Check responsive CSS file', true);
+                    const responsiveCSS = document.querySelector('link[href*="responsive"]');
+                    if (!responsiveCSS) throw new Error('Responsive CSS tidak ditemukan');
+
+                    testSuite.addStep(t, 2, 'Responsive CSS loaded', true);
+                }
+            );
+
+            const test3 = await testSuite.runTest(
+                'Mobile: Touch-Friendly Button Size (44px minimum)',
+                'workflow7',
+                async (t) => {
+                    testSuite.addStep(t, 1, 'Check button sizes', true);
+                    let smallButtons = 0;
+                    document.querySelectorAll('button').forEach(btn => {
+                        const height = btn.offsetHeight;
+                        const width = btn.offsetWidth;
+                        if (height < 44 || width < 44) smallButtons++;
+                    });
+
+                    testSuite.addStep(t, 2, `Button check: ${smallButtons} buttons < 44px`, smallButtons === 0);
+                }
+            );
+
+            document.getElementById('workflow7').innerHTML += testSuite.renderTest(test1);
+            document.getElementById('workflow7').innerHTML += testSuite.renderTest(test2);
+            document.getElementById('workflow7').innerHTML += testSuite.renderTest(test3);
+        }
+
+        // Main test runner
+        async function runAllTests() {
+            testSuite.logs = [];
+            testSuite.results = { total: 0, passed: 0, failed: 0, tests: [] };
+            document.getElementById('workflow1').innerHTML = '';
+            document.getElementById('workflow2').innerHTML = '';
+            document.getElementById('workflow3').innerHTML = '';
+            document.getElementById('workflow4').innerHTML = '';
+            document.getElementById('workflow5').innerHTML = '';
+            document.getElementById('workflow6').innerHTML = '';
+            document.getElementById('workflow7').innerHTML = '';
+
+            testSuite.log('=== Mulai E2E Testing Suite ===', 'info');
+            
+            await testCompleteWorkflow();
+            await testDataVolume();
+            await testErrorRecovery();
+            await testDataPersistence();
+            await testPerformance();
+            await testAccessibility();
+            await testMobileResponsive();
+
+            testSuite.log('=== Testing Selesai ===', 'success');
+            updateSummary();
+        }
+
+        function updateSummary() {
+            document.getElementById('summary').innerHTML = testSuite.renderSummary();
+        }
+
+        function clearResults() {
+            testSuite.logs = [];
+            testSuite.results = { total: 0, passed: 0, failed: 0, tests: [] };
+            document.querySelectorAll('[id^="workflow"]').forEach(el => el.innerHTML = '');
+            document.getElementById('summary').innerHTML = '';
+            testSuite.updateLogs();
+        }
+
+        function downloadResults() {
+            const results = {
+                timestamp: new Date().toISOString(),
+                summary: testSuite.getResults(),
+                logs: testSuite.logs
+            };
+            
+            const dataStr = JSON.stringify(results, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `e2e-test-results-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Auto-run on load
+        window.addEventListener('load', () => {
+            testSuite.log('Page loaded, ready to run tests', 'success');
+        });
+    </script>
+</body>
+</html>

@@ -1,102 +1,504 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Expense and Budget Visualizer - Track your daily expenses with visual analytics">
-    <meta name="keywords" content="expense tracker, budget, visualizer, finance">
-    <title>Expense & Budget Visualizer</title>
+    <meta name="description" content="Sistem Manajemen Pelanggan Marketplace Indonesia - Kelola pelanggan dengan mudah">
+    <meta name="keywords" content="customer management, pelanggan, marketplace, Indonesia">
+    <title>Sistem Manajemen Pelanggan Marketplace Indonesia</title>
     
     <!-- CSS files -->
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/responsive.css">
 </head>
 <body>
+    <!-- Skip to Main Content Link (Accessibility) -->
+    <a href="#main-content" class="skip-to-main">Lewati ke konten utama</a>
+    <a href="#search-input" class="skip-to-search">Lewati ke pencarian</a>
+
+    <!-- Notification Container -->
+    <div id="notification-container" class="notification-container" role="region" aria-live="polite" aria-label="Notifikasi sistem"></div>
+
     <!-- Main application container -->
-    <div id="app">
-        <!-- Input Form Section -->
-        <form id="transaction-form" class="transaction-form">
-            <h1>Add Expense</h1>
-            
-            <div class="form-group">
-                <label for="item-name">Item Name</label>
-                <input 
-                    type="text" 
-                    id="item-name" 
-                    name="itemName" 
-                    maxlength="100"
-                    aria-required="true"
-                    aria-describedby="item-name-error"
-                    placeholder="Enter item name"
-                />
-                <span id="item-name-error" class="error-message" role="alert" aria-live="polite"></span>
-            </div>
-            
-            <div class="form-group">
-                <label for="amount">Amount</label>
-                <input 
-                    type="number" 
-                    id="amount" 
-                    name="amount" 
-                    step="0.01"
-                    min="0.01"
-                    max="999999.99"
-                    aria-required="true"
-                    aria-describedby="amount-error"
-                    placeholder="0.00"
-                />
-                <span id="amount-error" class="error-message" role="alert" aria-live="polite"></span>
-            </div>
-            
-            <div class="form-group">
-                <label for="category">Category</label>
-                <select 
-                    id="category" 
-                    name="category"
-                    aria-required="true"
-                    aria-describedby="category-error"
-                >
-                    <option value="">-- Select Category --</option>
-                    <option value="Food">Food</option>
-                    <option value="Transport">Transport</option>
-                    <option value="Fun">Fun</option>
-                </select>
-                <span id="category-error" class="error-message" role="alert" aria-live="polite"></span>
-            </div>
-            
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Add Transaction</button>
-                <button type="reset" class="btn btn-secondary">Clear</button>
-            </div>
-            
-            <div id="form-success" class="success-message" role="status" aria-live="polite"></div>
-        </form>
+    <div id="app" role="application" aria-label="Aplikasi Manajemen Pelanggan Marketplace"
+        <!-- Login Section -->
+        <section id="login-section" class="login-container" role="main" aria-label="Form login aplikasi">
+            <form id="login-form" novalidate>
+                <h1>Masuk ke Aplikasi</h1>
+                
+                <div class="form-group">
+                    <label for="username-input">Username</label>
+                    <input 
+                        type="text" 
+                        id="username-input" 
+                        name="username"
+                        placeholder="Masukkan username"
+                        required
+                        aria-required="true"
+                        aria-describedby="login-error-msg"
+                    />
+                </div>
+                
+                <div class="form-group">
+                    <label for="password-input">Password</label>
+                    <input 
+                        type="password" 
+                        id="password-input" 
+                        name="password"
+                        placeholder="Masukkan password"
+                        required
+                        aria-required="true"
+                        aria-describedby="login-error-msg"
+                    />
+                </div>
+                
+                <div id="login-error-msg" class="error-message" role="alert" aria-live="polite" style="display: none;"></div>
+                
+                <button type="submit" id="login-btn" class="btn btn-primary">Masuk</button>
+            </form>
+        </section>
 
-        <!-- Balance Display Section -->
-        <div class="balance-display">
-            <h2>Total Expenses</h2>
-            <div id="balance-amount" class="balance-amount" aria-live="polite">
-                $0.00
-            </div>
-        </div>
+        <!-- Navigation Menu (hidden until login) -->
+        <nav class="navigation" id="nav-menu" style="display: none;" role="navigation" aria-label="Menu navigasi utama">
+            <button class="nav-toggle" id="nav-toggle" aria-label="Buka atau tutup menu navigasi" aria-expanded="false" aria-controls="nav-menu-list">
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+            </button>
+            <ul class="nav-menu" id="nav-menu-list" role="menubar">
+                <li role="none"><a href="#/" class="nav-link active" data-route="/" role="menuitem">Dashboard</a></li>
+                <li role="none"><a href="#/form" class="nav-link" data-route="/form" role="menuitem">Tambah Transaksi</a></li>
+                <li role="none"><a href="#/search" class="nav-link" data-route="/search" role="menuitem">Cari Pelanggan</a></li>
+                <li role="none"><a href="#/analytics" class="nav-link" data-route="/analytics" role="menuitem">Analitik</a></li>
+            </ul>
+        </nav>
 
-        <!-- Transaction List Section -->
-        <div class="transaction-list-container">
-            <h2>Transaction History</h2>
-            <div id="transaction-list" class="transaction-list" role="list">
-                <!-- Dynamic content rendered here -->
-                <p class="empty-state">No transactions recorded</p>
+        <!-- Dashboard (hidden until login) -->
+        <div id="dashboard" style="display: none;" role="main" aria-label="Konten utama dashboard">
+            <!-- Logout Button and Export/Import Buttons -->
+            <div class="dashboard-header">
+                <div class="dashboard-header-left">
+                    <button id="export-btn" class="btn btn-secondary" aria-label="Tombol untuk mengekspor data pelanggan ke CSV">📥 Ekspor CSV</button>
+                    <input type="file" id="import-file-input" class="hidden-file-input" accept=".csv" aria-label="Input file untuk mengimpor data pelanggan dari CSV">
+                    <button id="import-btn" class="btn btn-secondary" aria-label="Tombol untuk mengimpor data pelanggan dari file CSV">📤 Impor CSV</button>
+                </div>
+                <button id="logout-btn" class="btn btn-secondary" aria-label="Tombol untuk keluar dari aplikasi">Keluar</button>
             </div>
-        </div>
 
-        <!-- Chart Section -->
-        <div class="chart-container">
-            <h2>Expenses by Category</h2>
-            <div id="chart-wrapper">
-                <canvas id="expense-chart" aria-label="Pie chart showing expense distribution by category"></canvas>
-                <p id="chart-empty-state" class="chart-empty-state" style="display: none;">
-                    No expense data available
-                </p>
+            <!-- Dashboard KPI Section -->
+            <section id="dashboard-kpi" class="dashboard-kpi" role="region" aria-label="Ringkasan indikator kinerja utama">
+                <h1 id="main-content">Dashboard</h1>
+                <div class="kpi-container" role="list" aria-label="Daftar indikator kinerja">
+                    <!-- KPI Card 1: Total Customers -->
+                    <div class="kpi-card" role="listitem" tabindex="0" aria-label="Total Pelanggan">
+                        <div class="kpi-label">Total Pelanggan</div>
+                        <div class="kpi-value" id="kpi-customers" aria-live="polite">0</div>
+                        <div class="kpi-trend" aria-hidden="true">📈</div>
+                    </div>
+                    
+                    <!-- KPI Card 2: Total Revenue -->
+                    <div class="kpi-card" role="listitem" tabindex="0" aria-label="Total Pendapatan">
+                        <div class="kpi-label">Total Pendapatan</div>
+                        <div class="kpi-value" id="kpi-revenue" aria-live="polite">$0.00</div>
+                        <div class="kpi-trend" aria-hidden="true">📊</div>
+                    </div>
+                    
+                    <!-- KPI Card 3: Average Transaction -->
+                    <div class="kpi-card" role="listitem" tabindex="0" aria-label="Rata-rata Nilai Transaksi">
+                        <div class="kpi-label">Rata-rata Transaksi</div>
+                        <div class="kpi-value" id="kpi-average-transaction" aria-live="polite">$0.00</div>
+                        <div class="kpi-trend" aria-hidden="true">💰</div>
+                    </div>
+                    
+                    <!-- KPI Card 4: Monthly Transactions -->
+                    <div class="kpi-card" role="listitem" tabindex="0" aria-label="Transaksi Bulan Ini">
+                        <div class="kpi-label">Transaksi Bulan Ini</div>
+                        <div class="kpi-value" id="kpi-monthly-transactions" aria-live="polite">0</div>
+                        <div class="kpi-trend" aria-hidden="true">📈</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Input Form Section -->
+            <form id="transaction-form" class="transaction-form" novalidate aria-label="Formulir tambah transaksi">
+                <h1>Tambah Transaksi</h1>
+                
+                <!-- Product Information Section -->
+                <fieldset class="form-section">
+                    <legend>Informasi Barang</legend>
+                    
+                    <!-- 1. Nama Barang -->
+                    <div class="form-group">
+                        <label for="namaBarang">Nama Barang <span class="required" aria-label="wajib diisi">*</span></label>
+                        <input 
+                            type="text" 
+                            id="namaBarang" 
+                            name="namaBarang"
+                            maxlength="100"
+                            required
+                            aria-required="true"
+                            aria-describedby="namaBarang-error namaBarang-help"
+                            placeholder="Masukkan nama barang"
+                        />
+                        <small id="namaBarang-help" class="help-text">Maksimal 100 karakter</small>
+                        <span id="namaBarang-error" class="error-message" role="alert" aria-live="polite"></span>
+                    </div>
+                    
+                    <!-- 2. Kategori Barang -->
+                    <div class="form-group">
+                        <label for="kategoriBarang">Kategori Barang <span class="required" aria-label="wajib diisi">*</span></label>
+                        <select 
+                            id="kategoriBarang" 
+                            name="kategoriBarang"
+                            required
+                            aria-required="true"
+                            aria-describedby="kategoriBarang-error kategoriBarang-help"
+                        >
+                            <option value="">-- Pilih Kategori --</option>
+                            <option value="Elektronik">Elektronik</option>
+                            <option value="Pakaian">Pakaian</option>
+                            <option value="Makanan">Makanan</option>
+                            <option value="Kecantikan">Kecantikan</option>
+                            <option value="Furniture">Furniture</option>
+                            <option value="Lainnya">Lainnya</option>
+                        </select>
+                        <small id="kategoriBarang-help" class="help-text">Pilih salah satu kategori dari daftar</small>
+                        <span id="kategoriBarang-error" class="error-message" role="alert" aria-live="polite"></span>
+                    </div>
+                    
+                    <!-- 3. Harga Barang -->
+                    <div class="form-group">
+                        <label for="hargaBarang">Harga Barang (Rp) <span class="required" aria-label="wajib diisi">*</span></label>
+                        <input 
+                            type="number" 
+                            id="hargaBarang" 
+                            name="hargaBarang"
+                            step="1"
+                            min="0"
+                            required
+                            aria-required="true"
+                            aria-describedby="hargaBarang-error hargaBarang-help"
+                            placeholder="0"
+                        />
+                        <small id="hargaBarang-help" class="help-text">Masukkan harga tanpa koma atau titik. Minimum harga 0</small>
+                        <span id="hargaBarang-error" class="error-message" role="alert" aria-live="polite"></span>
+                    </div>
+                    
+                    <!-- 4. Kuantitas -->
+                    <div class="form-group">
+                        <label for="kuantitas">Kuantitas <span class="required" aria-label="wajib diisi">*</span></label>
+                        <input 
+                            type="number" 
+                            id="kuantitas" 
+                            name="kuantitas"
+                            step="1"
+                            min="1"
+                            required
+                            aria-required="true"
+                            aria-describedby="kuantitas-error kuantitas-help"
+                            placeholder="1"
+                        />
+                        <small id="kuantitas-help" class="help-text">Minimal 1 unit barang</small>
+                        <span id="kuantitas-error" class="error-message" role="alert" aria-live="polite"></span>
+                    </div>
+                    
+                    <!-- 5. Varian Barang -->
+                    <div class="form-group">
+                        <label for="varianBarang">Varian Barang <span class="optional">(Opsional)</span></label>
+                        <input 
+                            type="text" 
+                            id="varianBarang" 
+                            name="varianBarang"
+                            maxlength="100"
+                            aria-describedby="varianBarang-help varianBarang-error"
+                            placeholder="Contoh: Warna, ukuran, spesifikasi lainnya"
+                        />
+                        <small id="varianBarang-help" class="help-text">Misalnya: Merah, L, 64GB - maksimal 100 karakter</small>
+                        <span id="varianBarang-error" class="error-message" role="alert" aria-live="polite"></span>
+                    </div>
+                </fieldset>
+                
+                <!-- Shipping and Pricing Section -->
+                <fieldset class="form-section">
+                    <legend>Biaya dan Total</legend>
+                    
+                    <!-- 6. Ongkir -->
+                    <div class="form-group">
+                        <label for="ongkir">Ongkos Kirim (Rp) <span class="required" aria-label="wajib diisi">*</span></label>
+                        <input 
+                            type="number" 
+                            id="ongkir" 
+                            name="ongkir"
+                            step="1"
+                            min="0"
+                            required
+                            aria-required="true"
+                            aria-describedby="ongkir-error ongkir-help"
+                            placeholder="0"
+                        />
+                        <small id="ongkir-help" class="help-text">Biaya pengiriman ke lokasi pelanggan. Minimum 0</small>
+                        <span id="ongkir-error" class="error-message" role="alert" aria-live="polite"></span>
+                    </div>
+                    
+                    <!-- 7. Sisa Bayar -->
+                    <div class="form-group">
+                        <label for="sisaBayar">Sisa Bayar (Rp) <span class="required" aria-label="wajib diisi">*</span></label>
+                        <input 
+                            type="number" 
+                            id="sisaBayar" 
+                            name="sisaBayar"
+                            step="1"
+                            min="0"
+                            required
+                            aria-required="true"
+                            aria-describedby="sisaBayar-error sisaBayar-help"
+                            placeholder="0"
+                        />
+                        <small id="sisaBayar-help" class="help-text">Sisa uang yang harus dibayarkan oleh pelanggan. Minimum 0</small>
+                        <span id="sisaBayar-error" class="error-message" role="alert" aria-live="polite"></span>
+                    </div>
+                    
+                    <!-- 8. Total Belanja (Read-only) -->
+                    <div class="form-group">
+                        <label for="totalBelanja">Total Belanja (Rp) <span class="required" aria-label="wajib diisi">*</span></label>
+                        <input 
+                            type="number" 
+                            id="totalBelanja" 
+                            name="totalBelanja"
+                            step="1"
+                            min="0"
+                            readonly
+                            aria-required="true"
+                            aria-describedby="totalBelanja-error totalBelanja-help"
+                            placeholder="0"
+                        />
+                        <small id="totalBelanja-help" class="help-text">Otomatis dihitung (Harga × Kuantitas + Ongkir + Sisa Bayar)</small>
+                        <span id="totalBelanja-error" class="error-message" role="alert" aria-live="polite"></span>
+                    </div>
+                </fieldset>
+                
+                <!-- Customer Information Section -->
+                <fieldset class="form-section">
+                    <legend>Informasi Pembeli</legend>
+                    
+                    <!-- 9. Nama Pembeli -->
+                    <div class="form-group">
+                        <label for="namaPembeli">Nama Pembeli <span class="required" aria-label="wajib diisi">*</span></label>
+                        <input 
+                            type="text" 
+                            id="namaPembeli" 
+                            name="namaPembeli"
+                            maxlength="100"
+                            required
+                            aria-required="true"
+                            aria-describedby="namaPembeli-error namaPembeli-help"
+                            placeholder="Masukkan nama pembeli"
+                        />
+                        <small id="namaPembeli-help" class="help-text">Nama lengkap pelanggan, maksimal 100 karakter</small>
+                        <span id="namaPembeli-error" class="error-message" role="alert" aria-live="polite"></span>
+                    </div>
+                    
+                    <!-- 10. No Telepon -->
+                    <div class="form-group">
+                        <label for="noTelp">No Telepon <span class="required" aria-label="wajib diisi">*</span></label>
+                        <input 
+                            type="tel" 
+                            id="noTelp" 
+                            name="noTelp"
+                            pattern="[0-9]{10,}"
+                            required
+                            aria-required="true"
+                            aria-describedby="noTelp-error noTelp-help"
+                            placeholder="Contoh: 08123456789"
+                        />
+                        <small id="noTelp-help" class="help-text">Minimal 10 digit angka. Contoh: 08123456789 atau 628123456789</small>
+                        <span id="noTelp-error" class="error-message" role="alert" aria-live="polite"></span>
+                    </div>
+                    
+                    <!-- 11. ID Pelanggan (Read-only) -->
+                    <div class="form-group">
+                        <label for="idPelanggan">ID Pelanggan <span class="required" aria-label="wajib diisi">*</span></label>
+                        <input 
+                            type="text" 
+                            id="idPelanggan" 
+                            name="idPelanggan"
+                            readonly
+                            aria-required="true"
+                            aria-describedby="idPelanggan-error idPelanggan-help"
+                            placeholder="Otomatis"
+                        />
+                        <small id="idPelanggan-help" class="help-text">Dihasilkan secara otomatis saat transaksi disimpan (format: CUST-YYYYMMDD-XXXX)</small>
+                        <span id="idPelanggan-error" class="error-message" role="alert" aria-live="polite"></span>
+                    </div>
+                    
+                    <!-- 12. Alamat -->
+                    <div class="form-group">
+                        <label for="alamat">Alamat <span class="required" aria-label="wajib diisi">*</span></label>
+                        <textarea 
+                            id="alamat" 
+                            name="alamat"
+                            maxlength="500"
+                            rows="4"
+                            required
+                            aria-required="true"
+                            aria-describedby="alamat-error alamat-help"
+                            placeholder="Masukkan alamat lengkap termasuk nomor rumah, jalan, kota, provinsi"
+                        ></textarea>
+                        <small id="alamat-help" class="help-text">Alamat pengiriman yang lengkap dan jelas. Maksimal 500 karakter</small>
+                        <span id="alamat-error" class="error-message" role="alert" aria-live="polite"></span>
+                    </div>
+                </fieldset>
+                
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" aria-label="Tombol untuk menyimpan transaksi">Simpan Transaksi</button>
+                    <button type="reset" class="btn btn-secondary" aria-label="Tombol untuk menghapus semua data form">Bersihkan</button>
+                </div>
+                
+                <div id="form-success" class="success-message" role="status" aria-live="polite"></div>
+            </form>
+
+            <!-- Search Section -->
+            <section id="search" class="search-container" style="display: none;" role="region" aria-label="Bagian pencarian pelanggan">
+                <h1>Cari Pelanggan</h1>
+                <form id="search-form" novalidate aria-label="Formulir untuk mencari pelanggan">
+                    <div class="search-form-group">
+                        <input 
+                            type="text" 
+                            id="search-input" 
+                            name="search-query"
+                            placeholder="Cari ID Pelanggan..."
+                            aria-label="Input untuk mencari ID pelanggan"
+                            aria-describedby="search-help"
+                        />
+                        <small id="search-help" class="help-text">Masukkan ID pelanggan atau bagian dari ID untuk mencari (contoh: CUST-202402)</small>
+                        <button type="submit" class="btn btn-primary" aria-label="Tombol untuk melakukan pencarian pelanggan">Cari</button>
+                    </div>
+                </form>
+
+                <!-- Search Results Display Area -->
+                <div id="search-results" class="search-results" role="region" aria-label="Hasil pencarian pelanggan" aria-live="polite" aria-atomic="true">
+                    <!-- Dynamic search results rendered here -->
+                </div>
+
+                <!-- Empty State Message -->
+                <div id="search-empty-state" class="empty-state" role="status" style="display: none;" aria-live="polite">
+                    <p>Tidak ada hasil pencarian</p>
+                </div>
+            </section>
+
+            <!-- Balance Display Section -->
+            <div class="balance-display">
+                <h2>Total Expenses</h2>
+                <div id="balance-amount" class="balance-amount" aria-live="polite">
+                    $0.00
+                </div>
             </div>
+
+            <!-- Transaction List Section -->
+            <div class="transaction-list-container">
+                <h2>Transaction History</h2>
+                <div id="transaction-list" class="transaction-list" role="list">
+                    <!-- Dynamic content rendered here -->
+                    <p class="empty-state">No transactions recorded</p>
+                </div>
+            </div>
+
+            <!-- Chart Section -->
+            <div class="chart-container">
+                <h2>Expenses by Category</h2>
+                <div id="chart-wrapper">
+                    <canvas id="expense-chart" aria-label="Pie chart showing expense distribution by category"></canvas>
+                    <p id="chart-empty-state" class="chart-empty-state" style="display: none;">
+                        No expense data available
+                    </p>
+                </div>
+            </div>
+
+            <!-- Analytics Section -->
+            <section id="analytics-section" class="analytics-section" style="display: none;">
+                <h2>Analytics Dashboard</h2>
+                
+                <!-- Chart 1: Sales by Category (Pie Chart) -->
+                <div class="analytics-chart-container">
+                    <div class="analytics-chart-header">
+                        <h3>Penjualan per Kategori</h3>
+                    </div>
+                    <div class="analytics-chart-wrapper">
+                        <canvas 
+                            id="chart-category" 
+                            aria-label="Pie chart showing sales distribution by category"
+                        ></canvas>
+                        <p class="analytics-empty-state" style="display: none;">
+                            Tidak ada data kategori tersedia
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Chart 2: Monthly Revenue (Bar Chart) -->
+                <div class="analytics-chart-container">
+                    <div class="analytics-chart-header">
+                        <h3>Pendapatan Bulanan</h3>
+                    </div>
+                    <div class="analytics-chart-wrapper">
+                        <canvas 
+                            id="chart-monthly" 
+                            aria-label="Bar chart showing monthly revenue"
+                        ></canvas>
+                        <p class="analytics-empty-state" style="display: none;">
+                            Tidak ada data pendapatan tersedia
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Chart 3: Top 10 Customers (Horizontal Bar Chart) -->
+                <div class="analytics-chart-container">
+                    <div class="analytics-chart-header">
+                        <h3>Top 10 Pelanggan</h3>
+                    </div>
+                    <div class="analytics-chart-wrapper">
+                        <canvas 
+                            id="chart-top-customers" 
+                            aria-label="Horizontal bar chart showing top 10 customers by spending"
+                        ></canvas>
+                        <p class="analytics-empty-state" style="display: none;">
+                            Tidak ada data pelanggan tersedia
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Chart 4: Transaction Status (Doughnut Chart) -->
+                <div class="analytics-chart-container">
+                    <div class="analytics-chart-header">
+                        <h3>Status Transaksi</h3>
+                    </div>
+                    <div class="analytics-chart-wrapper">
+                        <canvas 
+                            id="chart-status" 
+                            aria-label="Doughnut chart showing transaction status distribution"
+                        ></canvas>
+                        <p class="analytics-empty-state" style="display: none;">
+                            Tidak ada data status tersedia
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Chart 5: Sales Trend (Line Chart) -->
+                <div class="analytics-chart-container">
+                    <div class="analytics-chart-header">
+                        <h3>Tren Penjualan</h3>
+                    </div>
+                    <div class="analytics-chart-wrapper">
+                        <canvas 
+                            id="chart-trend" 
+                            aria-label="Line chart showing sales trend over time"
+                        ></canvas>
+                        <p class="analytics-empty-state" style="display: none;">
+                            Tidak ada data tren tersedia
+                        </p>
+                    </div>
+                </div>
+            </section>
         </div>
     </div>
 
@@ -105,6 +507,45 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"
             integrity="sha384-GsW3YpbcyNmCUMIybN8xIVG45+6Kz5YuHg60/JicLkOLVmMetasleFgJDM6KTf60m"
             crossorigin="anonymous"></script>
+
+    <!-- Storage API Wrapper -->
+    <script src="js/storage-api.js" defer></script>
+
+    <!-- Cache Manager -->
+    <script src="js/cache-manager.js" defer></script>
+
+    <!-- Validation Engine -->
+    <script src="js/validation-engine.js" defer></script>
+
+    <!-- Calculation Engine -->
+    <script src="js/calculation-engine.js" defer></script>
+
+    <!-- Authentication Manager -->
+    <script src="js/auth-manager.js" defer></script>
+
+    <!-- Customer Manager -->
+    <script src="js/customer-manager.js" defer></script>
+
+    <!-- Search Manager -->
+    <script src="js/search-manager.js" defer></script>
+
+    <!-- Notification Manager -->
+    <script src="js/notification-manager.js" defer></script>
+
+    <!-- Loading Manager -->
+    <script src="js/loading-manager.js" defer></script>
+
+    <!-- Dashboard Manager -->
+    <script src="js/dashboard-manager.js" defer></script>
+
+    <!-- Chart Manager -->
+    <script src="js/chart-manager.js" defer></script>
+
+    <!-- Export Manager -->
+    <script src="js/export-manager.js" defer></script>
+
+    <!-- Navigation Manager -->
+    <script src="js/navigation-manager.js" defer></script>
 
     <!-- Application Script -->
     <script src="js/app.js" defer></script>

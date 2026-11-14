@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StorageAPI Optimized Tests</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .summary {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        .summary.all-pass {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+
+        .summary.has-fail {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .metrics-container {
+            background: #f8f9fa;
+            border-left: 4px solid #17a2b8;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .test-section {
+            margin-bottom: 30px;
+        }
+
+        .test-section h2 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .test-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .test-case {
+            padding: 15px;
+            border-radius: 6px;
+            background: white;
+            border-left: 4px solid #ccc;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .test-case:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .test-case.pass {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+
+        .test-case.fail {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .test-status {
+            font-weight: bold;
+            font-size: 11px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            padding: 3px 6px;
+            border-radius: 3px;
+            display: inline-block;
+            width: fit-content;
+        }
+
+        .test-status.pass {
+            background: #28a745;
+            color: white;
+        }
+
+        .test-status.fail {
+            background: #dc3545;
+            color: white;
+        }
+
+        .test-case > div:nth-child(2) {
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+            margin-top: 8px;
+        }
+
+        .test-message {
+            font-size: 12px;
+            color: #666;
+            margin-top: 8px;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+
+        footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            border-top: 1px solid #dee2e6;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 8px;
+            }
+
+            header {
+                padding: 20px;
+            }
+
+            header h1 {
+                font-size: 20px;
+            }
+
+            .content {
+                padding: 15px;
+            }
+
+            .test-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🗄️ StorageAPI Optimized Tests</h1>
+            <p>Testing batch operations, compression, lazy loading, and backward compatibility</p>
+        </header>
+
+        <div class="content">
+            <!-- Summary -->
+            <div id="summary-optimized" class="summary"></div>
+
+            <!-- Metrics -->
+            <div id="metrics-optimized" class="metrics-container"></div>
+
+            <!-- Batch Operations -->
+            <div class="test-section">
+                <h2>📦 Batch Operations</h2>
+                <div id="test-batch" class="test-container"></div>
+            </div>
+
+            <!-- Compression -->
+            <div class="test-section">
+                <h2>🗜️ Compression</h2>
+                <div id="test-compression" class="test-container"></div>
+            </div>
+
+            <!-- Lazy Loading -->
+            <div class="test-section">
+                <h2>⚡ Lazy Loading & Pagination</h2>
+                <div id="test-lazy-loading" class="test-container"></div>
+            </div>
+
+            <!-- Backward Compatibility -->
+            <div class="test-section">
+                <h2>🔄 Backward Compatibility</h2>
+                <div id="test-backward-compat" class="test-container"></div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="test-section">
+                <h2>📊 Storage Statistics</h2>
+                <div id="test-statistics" class="test-container"></div>
+            </div>
+
+            <!-- Error Handling -->
+            <div class="test-section">
+                <h2>⚠️ Error Handling</h2>
+                <div id="test-error-handling" class="test-container"></div>
+            </div>
+        </div>
+
+        <footer>
+            <p>StorageAPI Optimized Test Suite | Marketplace Customer Management System</p>
+            <p>Tests for Task 15.2: Optimize LocalStorage operations</p>
+        </footer>
+    </div>
+
+    <!-- Load StorageAPI before tests -->
+    <script src="../js/storage-api.js"></script>
+    <script src="storage-api-optimized.test.js"></script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Structure Verification</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+    <style>
+        body {
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-results {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .test-passed {
+            color: #4CAF50;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .test-failed {
+            color: #f44336;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .structure-demo {
+            margin: 30px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dashboard KPI Structure Verification</h1>
+    
+    <div class="test-results">
+        <h2>Structure Verification Results</h2>
+        <div id="results"></div>
+    </div>
+
+    <!-- Dashboard KPI Section Demo -->
+    <div class="structure-demo">
+        <h2>Dashboard KPI Preview (Desktop - 4 columns)</h2>
+        <section id="dashboard-kpi" class="dashboard-kpi">
+            <h1>Dashboard</h1>
+            <div class="kpi-container">
+                <!-- KPI Card 1: Total Customers -->
+                <div class="kpi-card">
+                    <div class="kpi-label">Total Pelanggan</div>
+                    <div class="kpi-value" id="kpi-customers">0</div>
+                    <div class="kpi-trend">📈</div>
+                </div>
+                
+                <!-- KPI Card 2: Total Revenue -->
+                <div class="kpi-card">
+                    <div class="kpi-label">Total Pendapatan</div>
+                    <div class="kpi-value" id="kpi-revenue">$0.00</div>
+                    <div class="kpi-trend">📊</div>
+                </div>
+                
+                <!-- KPI Card 3: Average Transaction -->
+                <div class="kpi-card">
+                    <div class="kpi-label">Rata-rata Transaksi</div>
+                    <div class="kpi-value" id="kpi-average-transaction">$0.00</div>
+                    <div class="kpi-trend">💰</div>
+                </div>
+                
+                <!-- KPI Card 4: Monthly Transactions -->
+                <div class="kpi-card">
+                    <div class="kpi-label">Transaksi Bulan Ini</div>
+                    <div class="kpi-value" id="kpi-monthly-transactions">0</div>
+                    <div class="kpi-trend">📈</div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Verify all required elements exist
+        const tests = {
+            'Dashboard KPI section (#dashboard-kpi)': () => document.getElementById('dashboard-kpi') !== null,
+            'KPI Card Container (.kpi-container)': () => document.querySelector('.kpi-container') !== null,
+            'KPI Cards count (4 cards)': () => document.querySelectorAll('.kpi-card').length === 4,
+            'KPI Customers ID (#kpi-customers)': () => document.getElementById('kpi-customers') !== null,
+            'KPI Revenue ID (#kpi-revenue)': () => document.getElementById('kpi-revenue') !== null,
+            'KPI Average Transaction ID (#kpi-average-transaction)': () => document.getElementById('kpi-average-transaction') !== null,
+            'KPI Monthly Transactions ID (#kpi-monthly-transactions)': () => document.getElementById('kpi-monthly-transactions') !== null,
+            'KPI Labels present': () => document.querySelectorAll('.kpi-label').length === 4,
+            'KPI Values present': () => document.querySelectorAll('.kpi-value').length === 4,
+            'KPI Trends present': () => document.querySelectorAll('.kpi-trend').length === 4,
+            'CSS Grid layout applied': () => {
+                const container = document.querySelector('.kpi-container');
+                const computedStyle = window.getComputedStyle(container);
+                return computedStyle.display === 'grid';
+            }
+        };
+
+        const resultsDiv = document.getElementById('results');
+        let passedCount = 0;
+        let failedCount = 0;
+
+        Object.entries(tests).forEach(([testName, testFn]) => {
+            try {
+                const passed = testFn();
+                const resultClass = passed ? 'test-passed' : 'test-failed';
+                const resultText = passed ? '✓ PASSED' : '✗ FAILED';
+                resultsDiv.innerHTML += `<div class="${resultClass}">${resultText}: ${testName}</div>`;
+                if (passed) passedCount++;
+                else failedCount++;
+            } catch (error) {
+                resultsDiv.innerHTML += `<div class="test-failed">✗ ERROR: ${testName} - ${error.message}</div>`;
+                failedCount++;
+            }
+        });
+
+        resultsDiv.innerHTML += `<hr>`;
+        resultsDiv.innerHTML += `<div style="font-weight: bold; margin-top: 20px;">Total: ${passedCount} passed, ${failedCount} failed</div>`;
+    </script>
+</body>
+</html>

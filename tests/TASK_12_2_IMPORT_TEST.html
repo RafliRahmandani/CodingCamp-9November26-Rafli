@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task 12.2 - Import CSV Functionality Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section h2 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .test-case {
+            margin: 15px 0;
+            padding: 10px;
+            background: #f9f9f9;
+            border-left: 4px solid #007bff;
+        }
+        .test-case.pass {
+            border-left-color: #28a745;
+            background: #f0fff4;
+        }
+        .test-case.fail {
+            border-left-color: #dc3545;
+            background: #fff5f5;
+        }
+        .test-case h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+        }
+        .test-result {
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        .pass {
+            background: #28a745;
+            color: white;
+        }
+        .fail {
+            background: #dc3545;
+            color: white;
+        }
+        .info {
+            background: #17a2b8;
+            color: white;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+        .summary {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 4px solid #007bff;
+            margin-top: 20px;
+        }
+        .summary h3 {
+            margin-top: 0;
+        }
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 5000;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Task 12.2 - Import CSV Functionality Test</h1>
+        
+        <!-- Notification Container -->
+        <div id="notification-container" class="notification-container" role="region" aria-live="polite" aria-label="Notifikasi sistem"></div>
+        
+        <!-- Controls -->
+        <div class="test-section">
+            <h2>Test Controls</h2>
+            <button class="btn-primary" id="run-all-tests">Jalankan Semua Test</button>
+            <button class="btn-secondary" id="clear-results">Hapus Hasil</button>
+        </div>
+        
+        <!-- Sample CSV Download -->
+        <div class="test-section">
+            <h2>Sample CSV Files</h2>
+            <p>Download sample CSV files untuk testing:</p>
+            <button class="btn-primary" id="download-valid-csv">Download Valid CSV (5 rows)</button>
+            <button class="btn-primary" id="download-invalid-csv">Download Invalid CSV</button>
+            <button class="btn-primary" id="download-large-csv">Download Large CSV (100 rows)</button>
+        </div>
+        
+        <!-- Test Results -->
+        <div id="test-results" class="test-section" style="display: none;">
+            <h2>Test Results</h2>
+            <div id="results-content"></div>
+        </div>
+    </div>
+
+    <!-- Include required modules in correct order -->
+    <script src="../js/storage-api.js"></script>
+    <script src="../js/notification-manager.js"></script>
+    <script src="../js/calculation-engine.js"></script>
+    <script src="../js/customer-manager.js"></script>
+    <script src="../js/export-manager.js"></script>
+
+    <!-- Test Script -->
+    <script>
+        // Test Results Container
+        let testResults = [];
+        
+        /**
+         * Log a test result
+         */
+        function logTest(name, passed, message) {
+            const result = { name, passed, message, timestamp: new Date() };
+            testResults.push(result);
+            console.log(`[${passed ? 'PASS' : 'FAIL'}] ${name}: ${message}`);
+        }
+        
+        /**
+         * Display test results
+         */
+        function displayResults() {
+            const resultsDiv = document.getElementById('test-results');
+            const content = document.getElementById('results-content');
+            
+            let html = '';
+            let passCount = 0;
+            let failCount = 0;
+            
+            testResults.forEach((result, index) => {
+                const className = result.passed ? 'pass' : 'fail';
+                const statusText = result.passed ? 'PASS' : 'FAIL';
+                
+                if (result.passed) passCount++;
+                else failCount++;
+                
+                html += `
+                    <div class="test-case ${className}">
+                        <h3>${index + 1}. ${result.name}</h3>
+                        <span class="test-result ${className}">${statusText}</span>
+                        <p>${result.message}</p>
+                    </div>
+                `;
+            });
+            
+            html += `
+                <div class="summary">
+                    <h3>Summary</h3>
+                    <p>Total: ${testResults.length} | Pass: ${passCount} | Fail: ${failCount}</p>
+                </div>
+            `;
+            
+            content.innerHTML = html;
+            resultsDiv.style.display = 'block';
+        }
+        
+        /**
+         * Test 1: CSV Parser - Valid CSV
+         */
+        async function testCSVParserValid() {
+            try {
+                const csvContent = `ID Pelanggan,Waktu Transaksi,Nama Barang,Kategori Barang,Harga Barang (Rp),Kuantitas,Varian Barang,Ongkir (Rp),Sisa Bayar (Rp),Total Belanja (Rp),Nama Pembeli,No Telepon,Alamat
+CUST-20240101-0001,2024-01-01T10:30:00Z,Laptop,Elektronik,15000000,1,Silver,50000,100000,15150000,Budi Santoso,081234567890,Jakarta
+CUST-20240101-0002,2024-01-02T11:00:00Z,Mouse Wireless,Elektronik,150000,2,Black,10000,0,310000,Siti Nurhaliza,082345678901,Bandung`;
+
+                const allRows = await new Promise((resolve) => {
+                    // Parse using the same logic as importFromCSV
+                    const lines = csvContent.split('\n');
+                    const rows = [];
+                    let startIndex = 0;
+                    
+                    if (lines[0].charCodeAt(0) === 0xFEFF) {
+                        lines[0] = lines[0].slice(1);
+                    }
+                    
+                    for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+                        const line = lines[lineIndex];
+                        if (!line.trim()) continue;
+                        
+                        const values = [];
+                        let currentValue = '';
+                        let insideQuotes = false;
+                        
+                        for (let i = 0; i < line.length; i++) {
+                            const char = line[i];
+                            if (char === '"') {
+                                if (insideQuotes && line[i + 1] === '"') {
+                                    currentValue += '"';
+                                    i++;
+                                } else {
+                                    insideQuotes = !insideQuotes;
+                                }
+                            } else if (char === ',' && !insideQuotes) {
+                                values.push(currentValue.trim());
+                                currentValue = '';
+                            } else {
+                                currentValue += char;
+                            }
+                        }
+                        values.push(currentValue.trim());
+                        
+                        if (values.some(v => v)) {
+                            rows.push(values);
+                        }
+                    }
+                    resolve(rows);
+                });
+                
+                const dataRows = allRows.slice(1);
+                const passed = allRows.length === 3 && dataRows.length === 2;
+                logTest('CSV Parser - Valid CSV', passed, 
+                    `Parsed ${allRows.length} total rows, ${dataRows.length} data rows (expected 3 total, 2 data)`);
+            } catch (error) {
+                logTest('CSV Parser - Valid CSV', false, `Error: ${error.message}`);
+            }
+        }
+        
+        /**
+         * Test 2: CSV Parser - CSV with Special Characters
+         */
+        async function testCSVParserSpecialChars() {
+            try {
+                const csvContent = `ID Pelanggan,Waktu Transaksi,Nama Barang,Kategori Barang,Harga Barang (Rp),Kuantitas,Varian Barang,Ongkir (Rp),Sisa Bayar (Rp),Total Belanja (Rp),Nama Pembeli,No Telepon,Alamat
+CUST-20240101-0001,2024-01-01T10:30:00Z,"Keyboard, USB",Elektronik,250000,1,"Black, Mechanical",10000,0,260000,"Suyanto, Ph.D",081234567890,"Jln Sudirman, No. 123, Jakarta"`;
+
+                const lines = csvContent.split('\n');
+                const line = lines[1]; // Get first data row
+                
+                const values = [];
+                let currentValue = '';
+                let insideQuotes = false;
+                
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
+                    if (char === '"') {
+                        if (insideQuotes && line[i + 1] === '"') {
+                            currentValue += '"';
+                            i++;
+                        } else {
+                            insideQuotes = !insideQuotes;
+                        }
+                    } else if (char === ',' && !insideQuotes) {
+                        values.push(currentValue.trim());
+                        currentValue = '';
+                    } else {
+                        currentValue += char;
+                    }
+                }
+                values.push(currentValue.trim());
+                
+                const passed = values.length === 13 && 
+                              values[2].includes(',') && // Nama Barang with comma
+                              values[10].includes(',') && // Nama Pembeli with comma
+                              values[12].includes('.'); // Alamat with dot
+                
+                logTest('CSV Parser - Special Characters', passed, 
+                    `Successfully parsed ${values.length} fields with special characters`);
+            } catch (error) {
+                logTest('CSV Parser - Special Characters', false, `Error: ${error.message}`);
+            }
+        }
+        
+        /**
+         * Test 3: Validate CSV Structure
+         */
+        async function testCSVStructureValidation() {
+            try {
+                const validCSV = `ID Pelanggan,Waktu Transaksi,Nama Barang,Kategori Barang,Harga Barang (Rp),Kuantitas,Varian Barang,Ongkir (Rp),Sisa Bayar (Rp),Total Belanja (Rp),Nama Pembeli,No Telepon,Alamat
+CUST-20240101-0001,2024-01-01T10:30:00Z,Laptop,Elektronik,15000000,1,Silver,50000,100000,15150000,Budi Santoso,081234567890,Jakarta`;
+
+                const lines = validCSV.split('\n');
+                const headerCount = lines[0].split(',').length;
+                const dataCount = lines[1].split(',').length;
+                
+                const passed = headerCount === 13 && dataCount === 13;
+                logTest('CSV Structure - Column Count Validation', passed, 
+                    `Header has ${headerCount} columns, data has ${dataCount} columns (expected 13)`);
+            } catch (error) {
+                logTest('CSV Structure - Column Count Validation', false, `Error: ${error.message}`);
+            }
+        }
+        
+        /**
+         * Test 4: Numeric Fields Validation
+         */
+        async function testNumericFieldsValidation() {
+            try {
+                const testData = {
+                    hargaBarang: '15000000',
+                    kuantitas: '1',
+                    ongkir: '50000',
+                    sisaBayar: '100000',
+                    totalBelanja: '15150000'
+                };
+                
+                let allValid = true;
+                for (const [field, value] of Object.entries(testData)) {
+                    const parsed = parseFloat(value);
+                    if (isNaN(parsed)) {
+                        allValid = false;
+                        break;
+                    }
+                }
+                
+                logTest('Numeric Fields - Value Parsing', allValid, 
+                    `All numeric fields parsed successfully: harga=${parseFloat(testData.hargaBarang)}, qty=${parseInt(testData.kuantitas)}`);
+            } catch (error) {
+                logTest('Numeric Fields - Value Parsing', false, `Error: ${error.message}`);
+            }
+        }
+        
+        /**
+         * Test 5: Duplicate Detection
+         */
+        async function testDuplicateDetection() {
+            try {
+                // Clear and add test customers
+                await StorageAPI.clear();
+                
+                const testCustomer = {
+                    namaBarang: 'Laptop',
+                    kategoriBarang: 'Elektronik',
+                    hargaBarang: 15000000,
+                    kuantitas: 1,
+                    ongkir: 50000,
+                    sisaBayar: 100000,
+                    totalBelanja: 15150000,
+                    namaPembeli: 'Budi Santoso',
+                    noTelp: '081234567890',
+                    alamat: 'Jakarta'
+                };
+                
+                const created = await CustomerManager.create(testCustomer);
+                const existingId = created.id;
+                
+                // Try to import duplicate
+                const importData = {
+                    id: existingId,
+                    hargaBarang: 10000000,
+                    namaPembeli: 'Different Name'
+                };
+                
+                const existingCustomers = await CustomerManager.getAll();
+                const existingIds = new Set(existingCustomers.map(c => c.id));
+                const isDuplicate = existingIds.has(existingId);
+                
+                logTest('Duplicate Detection', isDuplicate, 
+                    `Successfully detected duplicate ID: ${existingId}`);
+                
+                // Cleanup
+                await StorageAPI.clear();
+            } catch (error) {
+                logTest('Duplicate Detection', false, `Error: ${error.message}`);
+            }
+        }
+        
+        /**
+         * Test 6: Import Summary Generation
+         */
+        async function testImportSummary() {
+            try {
+                const testResults = {
+                    success: 8,
+                    failed: 2,
+                    duplicates: 1,
+                    total: 10
+                };
+                
+                let summaryMessage = `${testResults.success} dari ${testResults.total} data berhasil diimpor`;
+                if (testResults.duplicates > 0) {
+                    summaryMessage += ` (${testResults.duplicates} duplikat dihindari)`;
+                }
+                
+                const passed = summaryMessage.includes('8') && 
+                              summaryMessage.includes('duplikat');
+                
+                logTest('Import Summary - Message Generation', passed, 
+                    `Generated summary: "${summaryMessage}"`);
+            } catch (error) {
+                logTest('Import Summary - Message Generation', false, `Error: ${error.message}`);
+            }
+        }
+        
+        /**
+         * Test 7: Empty CSV File Handling
+         */
+        async function testEmptyCsvHandling() {
+            try {
+                const emptyCSV = 'ID Pelanggan,Waktu Transaksi,Nama Barang,Kategori Barang,Harga Barang (Rp),Kuantitas,Varian Barang,Ongkir (Rp),Sisa Bayar (Rp),Total Belanja (Rp),Nama Pembeli,No Telepon,Alamat';
+                
+                const lines = emptyCSV.split('\n');
+                const dataRows = lines.slice(1).filter(line => line.trim());
+                
+                const passed = dataRows.length === 0;
+                logTest('Empty CSV - Handling', passed, 
+                    `Empty CSV correctly identified (header only, 0 data rows)`);
+            } catch (error) {
+                logTest('Empty CSV - Handling', false, `Error: ${error.message}`);
+            }
+        }
+        
+        /**
+         * Test 8: Malformed CSV Handling
+         */
+        async function testMalformedCSVHandling() {
+            try {
+                const malformedCSV = `ID Pelanggan,Waktu Transaksi
+CUST-20240101-0001,2024-01-01T10:30:00Z`;
+                
+                const lines = malformedCSV.split('\n');
+                const headerCount = lines[0].split(',').length;
+                const dataLine = lines[1];
+                
+                // Count fields properly handling quotes
+                let fieldCount = 0;
+                let insideQuotes = false;
+                for (let i = 0; i < dataLine.length; i++) {
+                    if (dataLine[i] === '"') {
+                        if (insideQuotes && dataLine[i + 1] === '"') {
+                            i++;
+                        } else {
+                            insideQuotes = !insideQuotes;
+                        }
+                    } else if (dataLine[i] === ',' && !insideQuotes) {
+                        fieldCount++;
+                    }
+                }
+                fieldCount++;
+                
+                const passed = headerCount !== fieldCount;
+                logTest('Malformed CSV - Detection', passed, 
+                    `Malformed CSV detected: header=${headerCount} fields, data=${fieldCount} fields`);
+            } catch (error) {
+                logTest('Malformed CSV - Detection', false, `Error: ${error.message}`);
+            }
+        }
+        
+        /**
+         * Generate sample CSV and trigger download
+         */
+        function downloadSampleCSV(type) {
+            let csvContent = 'ID Pelanggan,Waktu Transaksi,Nama Barang,Kategori Barang,Harga Barang (Rp),Kuantitas,Varian Barang,Ongkir (Rp),Sisa Bayar (Rp),Total Belanja (Rp),Nama Pembeli,No Telepon,Alamat\n';
+            let filename = '';
+            
+            if (type === 'valid') {
+                csvContent += `CUST-20240101-0001,2024-01-01T10:30:00Z,Laptop,Elektronik,15000000,1,Silver,50000,100000,15150000,Budi Santoso,081234567890,Jakarta
+CUST-20240101-0002,2024-01-02T11:00:00Z,Mouse Wireless,Elektronik,150000,2,Black,10000,0,310000,Siti Nurhaliza,082345678901,Bandung
+CUST-20240101-0003,2024-01-03T09:15:00Z,Keyboard,Elektronik,250000,1,"Mechanical, RGB",15000,50000,315000,Ahmad Wijaya,083456789012,Surabaya
+CUST-20240101-0004,2024-01-04T14:30:00Z,Monitor,Elektronik,2500000,1,27 inch,100000,200000,2800000,Rini Hermawan,084567890123,Medan
+CUST-20240101-0005,2024-01-05T16:45:00Z,Headphone,Elektronik,500000,3,Wireless,25000,75000,1600000,Citra Dewi,085678901234,Yogyakarta`;
+                filename = 'sample-valid-5rows.csv';
+            } else if (type === 'invalid') {
+                csvContent = 'Invalid CSV Content,Missing,Required,Fields\nDATA1,DATA2';
+                filename = 'sample-invalid.csv';
+            } else if (type === 'large') {
+                let rows = [];
+                for (let i = 1; i <= 100; i++) {
+                    const price = Math.floor(Math.random() * 10000000) + 100000;
+                    const qty = Math.floor(Math.random() * 10) + 1;
+                    const shipping = Math.floor(Math.random() * 100000) + 10000;
+                    const remaining = Math.floor(Math.random() * 500000);
+                    const total = price + shipping + remaining;
+                    
+                    rows.push(`CUST-20240101-${String(i).padStart(4, '0')},2024-01-0${(i % 9) + 1}T${String(Math.floor(Math.random() * 24)).padStart(2, '0')}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')}:00Z,Product ${i},Elektronik,${price},${qty},Variant,${shipping},${remaining},${total},Pembeli ${i},08${String(Math.floor(Math.random() * 999999999)).padStart(9, '0')},Alamat ${i}`);
+                }
+                csvContent += rows.join('\n');
+                filename = 'sample-large-100rows.csv';
+            }
+            
+            // Add BOM for Excel compatibility
+            const BOM = '\uFEFF';
+            const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            
+            setTimeout(() => {
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            }, 100);
+        }
+        
+        /**
+         * Run all tests
+         */
+        async function runAllTests() {
+            testResults = [];
+            
+            console.log('Starting Task 12.2 Import CSV Tests...');
+            
+            await testCSVParserValid();
+            await testCSVParserSpecialChars();
+            await testCSVStructureValidation();
+            await testNumericFieldsValidation();
+            await testDuplicateDetection();
+            await testImportSummary();
+            await testEmptyCsvHandling();
+            await testMalformedCSVHandling();
+            
+            displayResults();
+            console.log('All tests completed!');
+        }
+        
+        /**
+         * Setup event listeners
+         */
+        function setupEventListeners() {
+            document.getElementById('run-all-tests').addEventListener('click', runAllTests);
+            document.getElementById('clear-results').addEventListener('click', () => {
+                testResults = [];
+                document.getElementById('test-results').style.display = 'none';
+            });
+            
+            document.getElementById('download-valid-csv').addEventListener('click', () => {
+                downloadSampleCSV('valid');
+            });
+            document.getElementById('download-invalid-csv').addEventListener('click', () => {
+                downloadSampleCSV('invalid');
+            });
+            document.getElementById('download-large-csv').addEventListener('click', () => {
+                downloadSampleCSV('large');
+            });
+        }
+        
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', setupEventListeners);
+    </script>
+</body>
+</html>

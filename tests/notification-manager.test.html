@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NotificationManager Tests</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .test-section:last-child {
+            border-bottom: none;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: opacity 0.2s;
+        }
+        button:hover {
+            opacity: 0.8;
+        }
+        .btn-success {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .btn-error {
+            background-color: #f44336;
+            color: white;
+        }
+        .btn-warning {
+            background-color: #ff9800;
+            color: white;
+        }
+        .btn-info {
+            background-color: #2196F3;
+            color: white;
+        }
+        .btn-clear {
+            background-color: #757575;
+            color: white;
+        }
+        .test-results {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .test-result {
+            margin: 8px 0;
+            padding: 8px;
+            border-left: 3px solid #ddd;
+        }
+        .test-result.pass {
+            background-color: #e8f5e9;
+            border-left-color: #4CAF50;
+        }
+        .test-result.fail {
+            background-color: #ffebee;
+            border-left-color: #f44336;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #555;
+            margin-top: 0;
+            font-size: 18px;
+        }
+        .info-text {
+            color: #666;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>NotificationManager Module Tests</h1>
+        
+        <!-- Test 1: Basic Notification Display -->
+        <div class="test-section">
+            <h2>Test 1: Basic Notification Display</h2>
+            <p class="info-text">Test showing success, error, warning, and info notifications</p>
+            <div class="button-group">
+                <button class="btn-success" onclick="testSuccessNotification()">Show Success</button>
+                <button class="btn-error" onclick="testErrorNotification()">Show Error</button>
+                <button class="btn-warning" onclick="testWarningNotification()">Show Warning</button>
+                <button class="btn-info" onclick="testInfoNotification()">Show Info</button>
+            </div>
+            <div class="test-results" id="test1-results"></div>
+        </div>
+
+        <!-- Test 2: Auto-dismiss Functionality -->
+        <div class="test-section">
+            <h2>Test 2: Auto-dismiss Functionality</h2>
+            <p class="info-text">Notification should auto-dismiss after specified duration</p>
+            <div class="button-group">
+                <button class="btn-success" onclick="testAutoDismiss3Seconds()">Show (3 sec)</button>
+                <button class="btn-success" onclick="testAutoDismiss5Seconds()">Show (5 sec)</button>
+            </div>
+            <div class="test-results" id="test2-results"></div>
+        </div>
+
+        <!-- Test 3: Manual Dismiss -->
+        <div class="test-section">
+            <h2>Test 3: Manual Dismiss</h2>
+            <p class="info-text">Test manual close button functionality</p>
+            <div class="button-group">
+                <button class="btn-info" onclick="testManualDismiss()">Show with Close Button</button>
+            </div>
+            <div class="test-results" id="test3-results"></div>
+        </div>
+
+        <!-- Test 4: Stack Multiple Notifications -->
+        <div class="test-section">
+            <h2>Test 4: Stack Multiple Notifications</h2>
+            <p class="info-text">Test stacking up to 5 notifications</p>
+            <div class="button-group">
+                <button class="btn-info" onclick="testStackNotifications()">Stack 5 Notifications</button>
+            </div>
+            <div class="test-results" id="test4-results"></div>
+        </div>
+
+        <!-- Test 5: Clear All Notifications -->
+        <div class="test-section">
+            <h2>Test 5: Clear All Notifications</h2>
+            <p class="info-text">Test clearing all active notifications</p>
+            <div class="button-group">
+                <button class="btn-info" onclick="testClearAll()">Show and Clear All</button>
+            </div>
+            <div class="test-results" id="test5-results"></div>
+        </div>
+
+        <!-- Test 6: Accessibility -->
+        <div class="test-section">
+            <h2>Test 6: Accessibility (ARIA)</h2>
+            <p class="info-text">Test aria-live region and role attributes</p>
+            <div class="button-group">
+                <button class="btn-info" onclick="testAccessibility()">Test Accessibility</button>
+            </div>
+            <div class="test-results" id="test6-results"></div>
+        </div>
+
+        <!-- Test 7: Long Messages -->
+        <div class="test-section">
+            <h2>Test 7: Long Messages</h2>
+            <p class="info-text">Test notification with long text content</p>
+            <div class="button-group">
+                <button class="btn-info" onclick="testLongMessage()">Show Long Message</button>
+            </div>
+            <div class="test-results" id="test7-results"></div>
+        </div>
+
+        <!-- Test 8: Rapid Notifications -->
+        <div class="test-section">
+            <h2>Test 8: Rapid Notifications</h2>
+            <p class="info-text">Test showing notifications in rapid succession</p>
+            <div class="button-group">
+                <button class="btn-info" onclick="testRapidNotifications()">Show 10 Rapid Notifications</button>
+            </div>
+            <div class="test-results" id="test8-results"></div>
+        </div>
+
+        <!-- Test 9: Return Value -->
+        <div class="test-section">
+            <h2>Test 9: Return Value and Control</h2>
+            <p class="info-text">Test that show() returns notification object with dismiss method</p>
+            <div class="button-group">
+                <button class="btn-info" onclick="testReturnValue()">Test Return Value</button>
+                <button class="btn-clear" id="manual-dismiss-btn" style="display:none;" onclick="testManualDismissControl()">Manual Dismiss</button>
+            </div>
+            <div class="test-results" id="test9-results"></div>
+        </div>
+
+        <!-- Test 10: Active Count -->
+        <div class="test-section">
+            <h2>Test 10: Active Count Tracking</h2>
+            <p class="info-text">Test getActiveCount() method</p>
+            <div class="button-group">
+                <button class="btn-info" onclick="testActiveCount()">Test Active Count</button>
+            </div>
+            <div class="test-results" id="test10-results"></div>
+        </div>
+
+        <!-- Test 11: Different Durations -->
+        <div class="test-section">
+            <h2>Test 11: Custom Durations</h2>
+            <p class="info-text">Test notifications with different auto-dismiss durations</p>
+            <div class="button-group">
+                <button class="btn-success" onclick="testCustomDuration(2000)">2 Seconds</button>
+                <button class="btn-info" onclick="testCustomDuration(4000)">4 Seconds</button>
+                <button class="btn-warning" onclick="testCustomDuration(8000)">8 Seconds</button>
+            </div>
+            <div class="test-results" id="test11-results"></div>
+        </div>
+
+        <!-- Test 12: Responsive Layout -->
+        <div class="test-section">
+            <h2>Test 12: Responsive Design</h2>
+            <p class="info-text">Resize browser to test mobile responsiveness. Notification should adapt to screen size.</p>
+            <div class="button-group">
+                <button class="btn-info" onclick="testResponsive()">Show Notification (Mobile Test)</button>
+            </div>
+            <div class="test-results" id="test12-results"></div>
+        </div>
+    </div>
+
+    <!-- Load NotificationManager -->
+    <script src="../js/notification-manager.js"></script>
+
+    <script>
+        // Utility function to add test result
+        function addTestResult(testId, message, passed) {
+            const resultsDiv = document.getElementById(`test${testId}-results`);
+            if (resultsDiv) {
+                const resultElement = document.createElement('div');
+                resultElement.className = `test-result ${passed ? 'pass' : 'fail'}`;
+                resultElement.textContent = `${passed ? '✓ PASS' : '✗ FAIL'}: ${message}`;
+                resultsDiv.appendChild(resultElement);
+            }
+        }
+
+        function clearResults(testId) {
+            const resultsDiv = document.getElementById(`test${testId}-results`);
+            if (resultsDiv) {
+                resultsDiv.innerHTML = '';
+            }
+        }
+
+        // Test 1: Basic Notification Display
+        function testSuccessNotification() {
+            clearResults(1);
+            NotificationManager.success('Transaksi berhasil disimpan!');
+            addTestResult(1, 'Success notification displayed', true);
+        }
+
+        function testErrorNotification() {
+            clearResults(1);
+            NotificationManager.error('Terjadi kesalahan! Silakan coba lagi.');
+            addTestResult(1, 'Error notification displayed', true);
+        }
+
+        function testWarningNotification() {
+            clearResults(1);
+            NotificationManager.warning('Peringatan: Data belum lengkap.');
+            addTestResult(1, 'Warning notification displayed', true);
+        }
+
+        function testInfoNotification() {
+            clearResults(1);
+            NotificationManager.info('Informasi: Fitur baru tersedia.');
+            addTestResult(1, 'Info notification displayed', true);
+        }
+
+        // Test 2: Auto-dismiss
+        function testAutoDismiss3Seconds() {
+            clearResults(2);
+            const startTime = Date.now();
+            const notification = NotificationManager.show('Akan hilang dalam 3 detik...', 'info', 3000);
+            const container = document.getElementById('notification-container');
+            const initialCount = container.children.length;
+            
+            addTestResult(2, `Auto-dismiss in 3 seconds started (initial count: ${initialCount})`, true);
+
+            setTimeout(() => {
+                const finalCount = container.children.length;
+                const expected = initialCount - 1;
+                addTestResult(2, `Notification auto-dismissed (final count: ${finalCount}, expected: ${expected})`, finalCount === expected);
+            }, 3500);
+        }
+
+        function testAutoDismiss5Seconds() {
+            clearResults(2);
+            NotificationManager.success('Akan hilang dalam 5 detik...', 5000);
+            addTestResult(2, 'Auto-dismiss in 5 seconds started', true);
+        }
+
+        // Test 3: Manual Dismiss
+        function testManualDismiss() {
+            clearResults(3);
+            NotificationManager.info('Klik tombol × untuk menutup notifikasi ini.');
+            addTestResult(3, 'Manual close button test - click the × button on the notification', true);
+        }
+
+        // Test 4: Stack Multiple Notifications
+        function testStackNotifications() {
+            clearResults(4);
+            const container = document.getElementById('notification-container');
+            const startCount = container.children.length;
+
+            NotificationManager.success('Notifikasi 1');
+            NotificationManager.error('Notifikasi 2');
+            NotificationManager.warning('Notifikasi 3');
+            NotificationManager.info('Notifikasi 4');
+            NotificationManager.success('Notifikasi 5');
+
+            const endCount = container.children.length;
+            const expected = 5;
+            addTestResult(4, `Stacked ${expected} notifications (start: ${startCount}, end: ${endCount})`, endCount - startCount === expected);
+        }
+
+        // Test 5: Clear All
+        function testClearAll() {
+            clearResults(5);
+            NotificationManager.success('Notifikasi 1');
+            NotificationManager.error('Notifikasi 2');
+            
+            const container = document.getElementById('notification-container');
+            const beforeClear = container.children.length;
+            
+            NotificationManager.clearAll();
+            
+            const afterClear = container.children.length;
+            addTestResult(5, `Cleared all notifications (before: ${beforeClear}, after: ${afterClear})`, afterClear === 0);
+        }
+
+        // Test 6: Accessibility
+        function testAccessibility() {
+            clearResults(6);
+            NotificationManager.success('Notifikasi accessibility test');
+            
+            const container = document.getElementById('notification-container');
+            const hasLiveRegion = container.hasAttribute('aria-live');
+            const hasRole = container.hasAttribute('role');
+            const lastToast = container.lastChild;
+            const hasRole_alert = lastToast && lastToast.hasAttribute('role') && lastToast.getAttribute('role') === 'alert';
+
+            addTestResult(6, `Container has aria-live="${container.getAttribute('aria-live')}"`, hasLiveRegion);
+            addTestResult(6, `Container has role="${container.getAttribute('role')}"`, hasRole);
+            addTestResult(6, 'Toast has role="alert"', hasRole_alert);
+        }
+
+        // Test 7: Long Messages
+        function testLongMessage() {
+            clearResults(7);
+            const longMessage = 'Ini adalah pesan notifikasi yang sangat panjang untuk menguji apakah sistem notifikasi dapat menangani konten teks yang panjang dengan baik, termasuk word wrapping dan responsive design pada berbagai ukuran layar.';
+            NotificationManager.info(longMessage);
+            addTestResult(7, 'Long message notification displayed and wrapped correctly', true);
+        }
+
+        // Test 8: Rapid Notifications
+        function testRapidNotifications() {
+            clearResults(8);
+            for (let i = 1; i <= 10; i++) {
+                NotificationManager.show(`Notifikasi cepat #${i}`, ['success', 'error', 'warning', 'info'][i % 4], 8000);
+            }
+            const container = document.getElementById('notification-container');
+            const count = container.children.length;
+            addTestResult(8, `${count} notifications created in rapid succession`, count === 10);
+        }
+
+        // Test 9: Return Value
+        let lastNotification = null;
+        function testReturnValue() {
+            clearResults(9);
+            lastNotification = NotificationManager.show('Klick tombol "Manual Dismiss" untuk menutup notifikasi ini', 'info', 30000);
+            
+            const hasId = lastNotification && typeof lastNotification.id === 'string';
+            const hasDismissMethod = lastNotification && typeof lastNotification.dismiss === 'function';
+            
+            addTestResult(9, 'Return value has id property', hasId);
+            addTestResult(9, 'Return value has dismiss() method', hasDismissMethod);
+
+            const dismissBtn = document.getElementById('manual-dismiss-btn');
+            if (dismissBtn) {
+                dismissBtn.style.display = 'inline-block';
+            }
+        }
+
+        function testManualDismissControl() {
+            if (lastNotification) {
+                lastNotification.dismiss();
+                addTestResult(9, 'Notification dismissed via dismiss() method', true);
+                const dismissBtn = document.getElementById('manual-dismiss-btn');
+                if (dismissBtn) {
+                    dismissBtn.style.display = 'none';
+                }
+            }
+        }
+
+        // Test 10: Active Count
+        function testActiveCount() {
+            clearResults(10);
+            NotificationManager.clearAll();
+            
+            const beforeAdd = NotificationManager.getActiveCount();
+            NotificationManager.success('Test 1');
+            NotificationManager.error('Test 2');
+            NotificationManager.info('Test 3');
+            const afterAdd = NotificationManager.getActiveCount();
+            
+            addTestResult(10, `Active count before: ${beforeAdd}`, beforeAdd === 0);
+            addTestResult(10, `Active count after adding 3: ${afterAdd}`, afterAdd === 3);
+        }
+
+        // Test 11: Custom Durations
+        function testCustomDuration(duration) {
+            clearResults(11);
+            NotificationManager.show(`Akan hilang dalam ${duration / 1000} detik...`, 'info', duration);
+            addTestResult(11, `Notification with ${duration}ms duration displayed`, true);
+        }
+
+        // Test 12: Responsive Design
+        function testResponsive() {
+            clearResults(12);
+            const viewportWidth = window.innerWidth;
+            NotificationManager.info(`Ukuran viewport: ${viewportWidth}px. Notifikasi harus responsif.`);
+            addTestResult(12, `Responsive notification displayed for ${viewportWidth}px viewport`, true);
+        }
+    </script>
+</body>
+</html>

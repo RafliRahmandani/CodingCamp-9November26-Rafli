@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login UI Component Test</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .test-results {
+            margin: 2rem;
+            padding: 1.5rem;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            font-family: monospace;
+        }
+        .test-case {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background-color: white;
+            border-left: 4px solid #ddd;
+            border-radius: 4px;
+        }
+        .test-case.pass {
+            border-left-color: #4CAF50;
+        }
+        .test-case.fail {
+            border-left-color: #f44336;
+        }
+        .test-label {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        .test-message {
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+    
+    <div class="test-results" id="test-results">
+        <h2>Login UI Component Tests</h2>
+        <div id="test-log"></div>
+    </div>
+
+    <!-- Auth Manager Script -->
+    <script src="../js/auth-manager.js"></script>
+    
+    <!-- Test Setup -->
+    <script>
+        // Load the main HTML first
+        fetch('../index.html')
+            .then(response => response.text())
+            .then(html => {
+                // Extract just the content inside the app div
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const appContent = doc.getElementById('app').innerHTML;
+                document.getElementById('app').innerHTML = appContent;
+                
+                // Now load and initialize app.js
+                const appScript = document.createElement('script');
+                appScript.src = '../js/app.js';
+                document.body.appendChild(appScript);
+                
+                // Wait for app.js to load, then run tests
+                setTimeout(runTests, 500);
+            });
+
+        function runTests() {
+            const testLog = document.getElementById('test-log');
+            let passCount = 0;
+            let failCount = 0;
+
+            function logTest(name, passed, message) {
+                const testDiv = document.createElement('div');
+                testDiv.className = `test-case ${passed ? 'pass' : 'fail'}`;
+                testDiv.innerHTML = `
+                    <div class="test-label">${passed ? '✓' : '✗'} ${name}</div>
+                    <div class="test-message">${message}</div>
+                `;
+                testLog.appendChild(testDiv);
+                
+                if (passed) passCount++;
+                else failCount++;
+            }
+
+            // Test 1: Login form elements exist
+            try {
+                const loginForm = document.getElementById('login-form');
+                const usernameInput = document.getElementById('username-input');
+                const passwordInput = document.getElementById('password-input');
+                const loginBtn = document.getElementById('login-btn');
+                const errorMsg = document.getElementById('login-error-msg');
+                
+                const allExists = loginForm && usernameInput && passwordInput && loginBtn && errorMsg;
+                logTest('Login form elements exist', allExists, 
+                    `Form: ${loginForm ? '✓' : '✗'}, Username: ${usernameInput ? '✓' : '✗'}, Password: ${passwordInput ? '✓' : '✗'}, Button: ${loginBtn ? '✓' : '✗'}, Error: ${errorMsg ? '✓' : '✗'}`);
+            } catch (e) {
+                logTest('Login form elements exist', false, e.message);
+            }
+
+            // Test 2: Login section is visible by default
+            try {
+                const loginSection = document.getElementById('login-section');
+                const isVisible = loginSection && getComputedStyle(loginSection).display !== 'none';
+                logTest('Login section visible by default', isVisible,
+                    `Display: ${getComputedStyle(loginSection).display}`);
+            } catch (e) {
+                logTest('Login section visible by default', false, e.message);
+            }
+
+            // Test 3: Dashboard is hidden by default
+            try {
+                const dashboard = document.getElementById('dashboard');
+                const isHidden = dashboard && dashboard.style.display === 'none';
+                logTest('Dashboard hidden by default', isHidden,
+                    `Display: ${dashboard.style.display}`);
+            } catch (e) {
+                logTest('Dashboard hidden by default', false, e.message);
+            }
+
+            // Test 4: Login with invalid credentials shows error
+            try {
+                const usernameInput = document.getElementById('username-input');
+                const passwordInput = document.getElementById('password-input');
+                const loginForm = document.getElementById('login-form');
+                const errorMsg = document.getElementById('login-error-msg');
+                
+                usernameInput.value = 'wronguser';
+                passwordInput.value = 'wrongpass';
+                
+                const event = new Event('submit', { bubbles: true, cancelable: true });
+                loginForm.dispatchEvent(event);
+                
+                const errorShown = errorMsg.style.display !== 'none' && errorMsg.textContent.includes('salah');
+                logTest('Invalid login shows error', errorShown,
+                    `Error visible: ${errorMsg.style.display !== 'none'}, Text: "${errorMsg.textContent}"`);
+            } catch (e) {
+                logTest('Invalid login shows error', false, e.message);
+            }
+
+            // Test 5: Login with correct credentials (admin/123456)
+            try {
+                const usernameInput = document.getElementById('username-input');
+                const passwordInput = document.getElementById('password-input');
+                const loginForm = document.getElementById('login-form');
+                const loginSection = document.getElementById('login-section');
+                const dashboard = document.getElementById('dashboard');
+                
+                usernameInput.value = 'admin';
+                passwordInput.value = '123456';
+                
+                const event = new Event('submit', { bubbles: true, cancelable: true });
+                loginForm.dispatchEvent(event);
+                
+                const loginHidden = loginSection.style.display === 'none';
+                const dashboardVisible = dashboard.style.display !== 'none';
+                const formCleared = usernameInput.value === '' && passwordInput.value === '';
+                
+                logTest('Valid login shows dashboard', loginHidden && dashboardVisible && formCleared,
+                    `Login hidden: ${loginHidden}, Dashboard visible: ${dashboardVisible}, Form cleared: ${formCleared}`);
+            } catch (e) {
+                logTest('Valid login shows dashboard', false, e.message);
+            }
+
+            // Test 6: Logout button exists and hides dashboard
+            try {
+                const logoutBtn = document.getElementById('logout-btn');
+                const loginSection = document.getElementById('login-section');
+                const dashboard = document.getElementById('dashboard');
+                
+                if (logoutBtn) {
+                    const event = new Event('click', { bubbles: true });
+                    logoutBtn.dispatchEvent(event);
+                    
+                    const loginVisible = loginSection.style.display !== 'none';
+                    const dashboardHidden = dashboard.style.display === 'none';
+                    
+                    logTest('Logout button works', loginVisible && dashboardHidden,
+                        `Login visible: ${loginVisible}, Dashboard hidden: ${dashboardHidden}`);
+                } else {
+                    logTest('Logout button works', false, 'Logout button not found');
+                }
+            } catch (e) {
+                logTest('Logout button works', false, e.message);
+            }
+
+            // Test 7: Form has required fields
+            try {
+                const usernameInput = document.getElementById('username-input');
+                const passwordInput = document.getElementById('password-input');
+                
+                const hasRequired = usernameInput.hasAttribute('required') && passwordInput.hasAttribute('required');
+                logTest('Form fields marked required', hasRequired,
+                    `Username required: ${usernameInput.hasAttribute('required')}, Password required: ${passwordInput.hasAttribute('required')}`);
+            } catch (e) {
+                logTest('Form fields marked required', false, e.message);
+            }
+
+            // Test 8: Input field types
+            try {
+                const usernameInput = document.getElementById('username-input');
+                const passwordInput = document.getElementById('password-input');
+                
+                const correctTypes = usernameInput.type === 'text' && passwordInput.type === 'password';
+                logTest('Input field types correct', correctTypes,
+                    `Username type: ${usernameInput.type}, Password type: ${passwordInput.type}`);
+            } catch (e) {
+                logTest('Input field types correct', false, e.message);
+            }
+
+            // Test 9: Labels are in Indonesian
+            try {
+                const form = document.getElementById('login-form');
+                const labels = form.querySelectorAll('label');
+                const labelTexts = Array.from(labels).map(l => l.textContent);
+                const hasIndonesian = labelTexts.some(t => t.includes('Username')) && 
+                                     labelTexts.some(t => t.includes('Password'));
+                const hasButton = form.querySelector('button[type="submit"]').textContent.includes('Masuk');
+                
+                logTest('UI text in Indonesian', hasIndonesian && hasButton,
+                    `Labels found: ${labelTexts.join(', ')}, Button: "Masuk"`);
+            } catch (e) {
+                logTest('UI text in Indonesian', false, e.message);
+            }
+
+            // Summary
+            const summary = document.createElement('div');
+            summary.style.marginTop = '2rem';
+            summary.style.fontSize = '1.1rem';
+            summary.style.fontWeight = 'bold';
+            summary.innerHTML = `<p>Tests Passed: ${passCount}/${passCount + failCount}</p>`;
+            testLog.appendChild(summary);
+        }
+    </script>
+</body>
+</html>

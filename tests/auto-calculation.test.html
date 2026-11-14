@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test: Auto-Calculation of Total Belanja (Task 8.3)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .form-group {
+            margin: 10px 0;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        input {
+            padding: 8px;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #e8f4f8;
+            border-left: 4px solid #007bff;
+        }
+        .pass {
+            color: green;
+            font-weight: bold;
+        }
+        .fail {
+            color: red;
+            font-weight: bold;
+        }
+        h2 {
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        h3 {
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test: Auto-Calculation of Total Belanja (Task 8.3)</h1>
+    
+    <p>This test verifies that the Total Belanja field auto-calculates based on:</p>
+    <ul>
+        <li>Kuantitas (Quantity)</li>
+        <li>Harga Barang (Unit Price)</li>
+        <li>Ongkir (Shipping)</li>
+        <li>Sisa Bayar (Remaining Payment)</li>
+    </ul>
+    
+    <p><strong>Formula:</strong> Total Belanja = (Kuantitas × Harga Barang) + Ongkir + Sisa Bayar</p>
+    
+    <!-- Test 1: Basic Calculation -->
+    <div class="test-section">
+        <h2>Test 1: Basic Calculation</h2>
+        <form id="form1" novalidate>
+            <div class="form-group">
+                <label for="form1_qty">Kuantitas</label>
+                <input type="number" id="form1_qty" value="2" min="0" step="1">
+            </div>
+            <div class="form-group">
+                <label for="form1_harga">Harga Barang (Rp)</label>
+                <input type="number" id="form1_harga" value="50000" min="0" step="1">
+            </div>
+            <div class="form-group">
+                <label for="form1_ongkir">Ongkir (Rp)</label>
+                <input type="number" id="form1_ongkir" value="10000" min="0" step="1">
+            </div>
+            <div class="form-group">
+                <label for="form1_sisabayar">Sisa Bayar (Rp)</label>
+                <input type="number" id="form1_sisabayar" value="5000" min="0" step="1">
+            </div>
+            <div class="form-group">
+                <label for="form1_total">Total Belanja (Rp) - Read Only</label>
+                <input type="number" id="form1_total" readonly>
+            </div>
+            <button type="button" onclick="testCalculation('form1', (2 * 50000) + 10000 + 5000)">Calculate</button>
+            <div id="form1_result"></div>
+        </form>
+        <p><small>Expected: (2 × 50.000) + 10.000 + 5.000 = 115.000</small></p>
+    </div>
+    
+    <!-- Test 2: With Decimal Values -->
+    <div class="test-section">
+        <h2>Test 2: Decimal Values</h2>
+        <form id="form2" novalidate>
+            <div class="form-group">
+                <label for="form2_qty">Kuantitas</label>
+                <input type="number" id="form2_qty" value="3" min="0" step="1">
+            </div>
+            <div class="form-group">
+                <label for="form2_harga">Harga Barang (Rp)</label>
+                <input type="number" id="form2_harga" value="15500.50" min="0" step="0.01">
+            </div>
+            <div class="form-group">
+                <label for="form2_ongkir">Ongkir (Rp)</label>
+                <input type="number" id="form2_ongkir" value="7500" min="0" step="1">
+            </div>
+            <div class="form-group">
+                <label for="form2_sisabayar">Sisa Bayar (Rp)</label>
+                <input type="number" id="form2_sisabayar" value="2000" min="0" step="1">
+            </div>
+            <div class="form-group">
+                <label for="form2_total">Total Belanja (Rp) - Read Only</label>
+                <input type="number" id="form2_total" readonly>
+            </div>
+            <button type="button" onclick="testCalculation('form2', (3 * 15500.50) + 7500 + 2000)">Calculate</button>
+            <div id="form2_result"></div>
+        </form>
+        <p><small>Expected: (3 × 15.500,50) + 7.500 + 2.000 = 54.051,50</small></p>
+    </div>
+    
+    <!-- Test 3: Real-Time Calculation with Event Listeners -->
+    <div class="test-section">
+        <h2>Test 3: Real-Time Auto-Calculation</h2>
+        <p>Try changing the values below - the Total Belanja should update automatically:</p>
+        <form id="form3" novalidate>
+            <div class="form-group">
+                <label for="form3_qty">Kuantitas</label>
+                <input type="number" id="form3_qty" value="1" min="0" step="1">
+            </div>
+            <div class="form-group">
+                <label for="form3_harga">Harga Barang (Rp)</label>
+                <input type="number" id="form3_harga" value="100000" min="0" step="1">
+            </div>
+            <div class="form-group">
+                <label for="form3_ongkir">Ongkir (Rp)</label>
+                <input type="number" id="form3_ongkir" value="20000" min="0" step="1">
+            </div>
+            <div class="form-group">
+                <label for="form3_sisabayar">Sisa Bayar (Rp)</label>
+                <input type="number" id="form3_sisabayar" value="0" min="0" step="1">
+            </div>
+            <div class="form-group">
+                <label for="form3_total">Total Belanja (Rp) - Auto-Updates</label>
+                <input type="number" id="form3_total" readonly>
+            </div>
+            <div id="form3_result"></div>
+        </form>
+        <p><small>Try changing Kuantitas, Harga Barang, Ongkir, or Sisa Bayar values and watch the Total Belanja update</small></p>
+    </div>
+    
+    <!-- Test 4: Edge Cases -->
+    <div class="test-section">
+        <h2>Test 4: Edge Cases</h2>
+        
+        <h3>4a. Zero Values</h3>
+        <form id="form4a" novalidate>
+            <div class="form-group">
+                <label for="form4a_qty">Kuantitas</label>
+                <input type="number" id="form4a_qty" value="0" min="0" step="1">
+            </div>
+            <div class="form-group">
+                <label for="form4a_harga">Harga Barang (Rp)</label>
+                <input type="number" id="form4a_harga" value="0" min="0" step="1">
+            </div>
+            <div class="form-group">
+                <label for="form4a_ongkir">Ongkir (Rp)</label>
+                <input type="number" id="form4a_ongkir" value="0" min="0" step="1">
+            </div>
+            <div class="form-group">
+                <label for="form4a_sisabayar">Sisa Bayar (Rp)</label>
+                <input type="number" id="form4a_sisabayar" value="0" min="0" step="1">
+            </div>
+            <div class="form-group">
+                <label for="form4a_total">Total Belanja (Rp)</label>
+                <input type="number" id="form4a_total" readonly>
+            </div>
+            <button type="button" onclick="testCalculation('form4a', 0)">Calculate</button>
+            <div id="form4a_result"></div>
+        </form>
+        <p><small>Expected: 0</small></p>
+        
+        <h3>4b. Large Values</h3>
+        <form id="form4b" novalidate>
+            <div class="form-group">
+                <label for="form4b_qty">Kuantitas</label>
+                <input type="number" id="form4b_qty" value="1000" min="0" step="1">
+            </div>
+            <div class="form-group">
+                <label for="form4b_harga">Harga Barang (Rp)</label>
+                <input type="number" id="form4b_harga" value="999999" min="0" step="1">
+            </div>
+            <div class="form-group">
+                <label for="form4b_ongkir">Ongkir (Rp)</label>
+                <input type="number" id="form4b_ongkir" value="500000" min="0" step="1">
+            </div>
+            <div class="form-group">
+                <label for="form4b_sisabayar">Sisa Bayar (Rp)</label>
+                <input type="number" id="form4b_sisabayar" value="100000" min="0" step="1">
+            </div>
+            <div class="form-group">
+                <label for="form4b_total">Total Belanja (Rp)</label>
+                <input type="number" id="form4b_total" readonly>
+            </div>
+            <button type="button" onclick="testCalculation('form4b', (1000 * 999999) + 500000 + 100000)">Calculate</button>
+            <div id="form4b_result"></div>
+        </form>
+        <p><small>Expected: (1.000 × 999.999) + 500.000 + 100.000 = 1.000.599.000</small></p>
+    </div>
+    
+    <script>
+        /**
+         * Test a calculation
+         */
+        function testCalculation(formId, expected) {
+            const form = document.getElementById(formId);
+            const resultDiv = document.getElementById(formId + '_result');
+            
+            if (!form) return;
+            
+            // Get input values
+            const qty = parseFloat(document.getElementById(formId + '_qty').value || 0);
+            const harga = parseFloat(document.getElementById(formId + '_harga').value || 0);
+            const ongkir = parseFloat(document.getElementById(formId + '_ongkir').value || 0);
+            const sisabayar = parseFloat(document.getElementById(formId + '_sisabayar').value || 0);
+            
+            // Calculate
+            const total = (qty * harga) + ongkir + sisabayar;
+            
+            // Update total field
+            const totalField = document.getElementById(formId + '_total');
+            totalField.value = total;
+            
+            // Check if correct
+            const tolerance = 0.01; // Allow small floating-point differences
+            const isCorrect = Math.abs(total - expected) < tolerance;
+            
+            // Display result
+            if (isCorrect) {
+                resultDiv.innerHTML = `<div class="result"><span class="pass">✓ PASS</span> - Total Belanja = ${total.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>`;
+            } else {
+                resultDiv.innerHTML = `<div class="result"><span class="fail">✗ FAIL</span> - Expected: ${expected.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2})}, Got: ${total.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>`;
+            }
+        }
+        
+        /**
+         * Set up auto-calculation for form3
+         */
+        function setupAutoCalculation() {
+            const fields = ['form3_qty', 'form3_harga', 'form3_ongkir', 'form3_sisabayar'];
+            
+            fields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.addEventListener('input', function() {
+                        const qty = parseFloat(document.getElementById('form3_qty').value || 0);
+                        const harga = parseFloat(document.getElementById('form3_harga').value || 0);
+                        const ongkir = parseFloat(document.getElementById('form3_ongkir').value || 0);
+                        const sisabayar = parseFloat(document.getElementById('form3_sisabayar').value || 0);
+                        
+                        const total = (qty * harga) + ongkir + sisabayar;
+                        document.getElementById('form3_total').value = total;
+                        
+                        // Update result message
+                        const resultDiv = document.getElementById('form3_result');
+                        resultDiv.innerHTML = `<div class="result">Total Belanja = ${total.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>`;
+                    });
+                }
+            });
+            
+            // Initial calculation
+            testCalculation('form3', 120000);
+        }
+        
+        // Set up auto-calculation when page loads
+        window.addEventListener('load', setupAutoCalculation);
+    </script>
+</body>
+</html>

@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Manager - Test Suite</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 20px;
+            background: #fafafa;
+        }
+        
+        .test-section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .test-case {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+            border-radius: 4px;
+        }
+        
+        .test-case.passed {
+            border-left-color: #4caf50;
+            background: #f1f8f4;
+        }
+        
+        .test-case.failed {
+            border-left-color: #f44336;
+            background: #fef5f5;
+        }
+        
+        .test-case h3 {
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        .test-case p {
+            font-size: 13px;
+            color: #666;
+            margin: 5px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .status-badge.passed {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .status-badge.failed {
+            background: #f44336;
+            color: white;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .stat {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+        
+        .output {
+            background: #f8f8f8;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            line-height: 1.5;
+        }
+        
+        .output-line {
+            margin: 5px 0;
+            padding: 3px 0;
+        }
+        
+        .output-line.success {
+            color: #4caf50;
+        }
+        
+        .output-line.error {
+            color: #f44336;
+        }
+        
+        .output-line.info {
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧪 Customer Manager Test Suite</h1>
+            <p>Comprehensive testing untuk CustomerManager module</p>
+        </div>
+        
+        <div class="content">
+            <div class="controls">
+                <button class="btn-primary" onclick="runAllTests()">▶ Jalankan Semua Test</button>
+                <button class="btn-secondary" onclick="clearStorage()">🗑 Hapus Storage</button>
+                <button class="btn-secondary" onclick="clearResults()">🔄 Clear Results</button>
+            </div>
+            
+            <div class="output" id="output"></div>
+            
+            <div class="test-section">
+                <h2>📋 Test Results</h2>
+                <div id="test-results">
+                    <p style="color: #999; text-align: center;">Klik tombol "Jalankan Semua Test" untuk memulai</p>
+                </div>
+            </div>
+            
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value" id="total-tests">0</div>
+                    <div class="stat-label">Total Test</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" style="color: #4caf50;" id="passed-tests">0</div>
+                    <div class="stat-label">Berhasil</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" style="color: #f44336;" id="failed-tests">0</div>
+                    <div class="stat-label">Gagal</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load dependencies -->
+    <script src="../js/storage-api.js"></script>
+    <script src="../js/validation-engine.js"></script>
+    <script src="../js/calculation-engine.js"></script>
+    <script src="../js/customer-manager.js"></script>
+    
+    <script>
+        // Test utilities
+        const TestResults = {
+            tests: [],
+            
+            add: function(name, passed, details = '') {
+                this.tests.push({
+                    name: name,
+                    passed: passed,
+                    details: details,
+                    timestamp: new Date().toLocaleTimeString('id-ID')
+                });
+            },
+            
+            getStats: function() {
+                const total = this.tests.length;
+                const passed = this.tests.filter(t => t.passed).length;
+                const failed = total - passed;
+                return { total, passed, failed };
+            },
+            
+            clear: function() {
+                this.tests = [];
+            }
+        };
+        
+        // Logging utility
+        const Logger = {
+            output: document.getElementById('output'),
+            
+            log: function(message, type = 'info') {
+                const line = document.createElement('div');
+                line.className = `output-line ${type}`;
+                line.textContent = message;
+                this.output.appendChild(line);
+                this.output.scrollTop = this.output.scrollHeight;
+            },
+            
+            clear: function() {
+                this.output.innerHTML = '';
+            }
+        };
+        
+        // Test suite
+        async function runAllTests() {
+            TestResults.clear();
+            Logger.clear();
+            
+            Logger.log('🚀 Memulai test suite...', 'info');
+            Logger.log('');
+            
+            await testCreate();
+            await testRead();
+            await testUpdate();
+            await testDelete();
+            await testGetAll();
+            await testSearch();
+            
+            Logger.log('');
+            Logger.log('✅ Test suite selesai!', 'success');
+            
+            updateStats();
+            displayResults();
+        }
+        
+        async function testCreate() {
+            Logger.log('📝 TEST: Create Customer', 'info');
+            
+            try {
+                // Test 1: Create valid customer
+                const testData = {
+                    namaBarang: 'Laptop Dell XPS 13',
+                    kategoriBarang: 'Elektronik',
+                    hargaBarang: 15000000,
+                    kuantitas: 2,
+                    varianBarang: 'Silver, i7, 16GB RAM',
+                    ongkir: 500000,
+                    sisaBayar: 29500000,
+                    totalBelanja: 29500000,
+                    namaPembeli: 'John Doe',
+                    noTelp: '081234567890',
+                    alamat: 'Jl. Merdeka No. 123, Jakarta'
+                };
+                
+                const customer = await CustomerManager.create(testData);
+                
+                const isValid = customer && 
+                    customer.id && 
+                    customer.id.startsWith('CUST-') &&
+                    customer.timestamp &&
+                    customer.namaBarang === testData.namaBarang;
+                
+                if (isValid) {
+                    Logger.log('✓ Customer berhasil dibuat dengan ID: ' + customer.id, 'success');
+                    TestResults.add('Create Customer - Valid Data', true, customer.id);
+                } else {
+                    Logger.log('✗ Customer tidak valid setelah dibuat', 'error');
+                    TestResults.add('Create Customer - Valid Data', false, 'Invalid customer');
+                }
+                
+                // Test 2: Verify ID format
+                const idRegex = /^CUST-\d{8}-\d{4}$/;
+                const idValid = idRegex.test(customer.id);
+                
+                if (idValid) {
+                    Logger.log('✓ Format ID CUST-YYYYMMDD-XXXX valid: ' + customer.id, 'success');
+                    TestResults.add('ID Format Validation', true, customer.id);
+                } else {
+                    Logger.log('✗ Format ID tidak sesuai CUST-YYYYMMDD-XXXX', 'error');
+                    TestResults.add('ID Format Validation', false, customer.id);
+                }
+                
+                // Test 3: Verify timestamp format (ISO 8601)
+                const isoRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+                const timestampValid = isoRegex.test(customer.timestamp);
+                
+                if (timestampValid) {
+                    Logger.log('✓ Timestamp ISO 8601 valid: ' + customer.timestamp, 'success');
+                    TestResults.add('Timestamp ISO 8601 Format', true, customer.timestamp);
+                } else {
+                    Logger.log('✗ Timestamp format tidak sesuai ISO 8601', 'error');
+                    TestResults.add('Timestamp ISO 8601 Format', false, customer.timestamp);
+                }
+                
+                // Test 4: Create customer dengan data minimal (required fields only)
+                const minimalData = {
+                    namaBarang: 'Barang Test',
+                    kategoriBarang: 'Test',
+                    hargaBarang: 1000,
+                    kuantitas: 1,
+                    ongkir: 0,
+                    sisaBayar: 0,
+                    totalBelanja: 1000,
+                    namaPembeli: 'Test Pembeli',
+                    noTelp: '0812345678',
+                    alamat: 'Jl Test'
+                };
+                
+                const minimalCustomer = await CustomerManager.create(minimalData);
+                const minimalValid = minimalCustomer && minimalCustomer.id;
+                
+                if (minimalValid) {
+                    Logger.log('✓ Customer dengan data minimal berhasil dibuat', 'success');
+                    TestResults.add('Create Customer - Minimal Data', true, minimalCustomer.id);
+                } else {
+                    Logger.log('✗ Gagal membuat customer dengan data minimal', 'error');
+                    TestResults.add('Create Customer - Minimal Data', false, 'Failed');
+                }
+                
+                // Test 5: Create customer with missing required field
+                const invalidData = {
+                    namaBarang: 'Test',
+                    kategoriBarang: 'Test',
+                    hargaBarang: 1000,
+                    kuantitas: 1,
+                    ongkir: 0,
+                    sisaBayar: 0,
+                    totalBelanja: 1000,
+                    namaPembeli: 'Test',
+                    // Missing noTelp and alamat
+                };
+                
+                const invalidCustomer = await CustomerManager.create(invalidData);
+                
+                if (invalidCustomer === null) {
+                    Logger.log('✓ Validasi bekerja: menolak data tidak lengkap', 'success');
+                    TestResults.add('Validation - Missing Required Fields', true);
+                } else {
+                    Logger.log('✗ Validasi tidak mendeteksi missing fields', 'error');
+                    TestResults.add('Validation - Missing Required Fields', false);
+                }
+                
+                Logger.log('');
+                
+            } catch (error) {
+                Logger.log('✗ Error dalam testCreate: ' + error.message, 'error');
+                TestResults.add('Create Test Suite', false, error.message);
+            }
+        }
+        
+        async function testRead() {
+            Logger.log('📖 TEST: Read Customer', 'info');
+            
+            try {
+                // Create a customer first
+                const testData = {
+                    namaBarang: 'Monitor LG 27 inch',
+                    kategoriBarang: 'Elektronik',
+                    hargaBarang: 3000000,
+                    kuantitas: 1,
+                    varianBarang: '4K, IPS',
+                    ongkir: 200000,
+                    sisaBayar: 3200000,
+                    totalBelanja: 3200000,
+                    namaPembeli: 'Jane Smith',
+                    noTelp: '082234567890',
+                    alamat: 'Jl. Sudirman No. 456, Bandung'
+                };
+                
+                const createdCustomer = await CustomerManager.create(testData);
+                
+                // Test 1: Read existing customer
+                const readCustomer = await CustomerManager.read(createdCustomer.id);
+                
+                const readValid = readCustomer && readCustomer.id === createdCustomer.id;
+                
+                if (readValid) {
+                    Logger.log('✓ Customer berhasil dibaca: ' + readCustomer.id, 'success');
+                    TestResults.add('Read Customer - Existing ID', true);
+                } else {
+                    Logger.log('✗ Gagal membaca customer yang ada', 'error');
+                    TestResults.add('Read Customer - Existing ID', false);
+                }
+                
+                // Test 2: Read non-existing customer
+                const nonExistingCustomer = await CustomerManager.read('CUST-99999999-9999');
+                
+                if (nonExistingCustomer === null) {
+                    Logger.log('✓ Read non-existing customer mengembalikan null', 'success');
+                    TestResults.add('Read Customer - Non-existing ID', true);
+                } else {
+                    Logger.log('✗ Read non-existing customer tidak null', 'error');
+                    TestResults.add('Read Customer - Non-existing ID', false);
+                }
+                
+                Logger.log('');
+                
+            } catch (error) {
+                Logger.log('✗ Error dalam testRead: ' + error.message, 'error');
+                TestResults.add('Read Test Suite', false, error.message);
+            }
+        }
+        
+        async function testUpdate() {
+            Logger.log('✏️ TEST: Update Customer', 'info');
+            
+            try {
+                // Create a customer first
+                const testData = {
+                    namaBarang: 'Mouse Logitech MX Master',
+                    kategoriBarang: 'Aksesoris',
+                    hargaBarang: 1500000,
+                    kuantitas: 1,
+                    varianBarang: 'Wireless, Black',
+                    ongkir: 100000,
+                    sisaBayar: 1600000,
+                    totalBelanja: 1600000,
+                    namaPembeli: 'Bob Johnson',
+                    noTelp: '083234567890',
+                    alamat: 'Jl. Ahmad Yani No. 789, Surabaya'
+                };
+                
+                const createdCustomer = await CustomerManager.create(testData);
+                
+                // Test 1: Update with partial data
+                const updateData = {
+                    namaPembeli: 'Robert Johnson',
+                    noTelp: '083234567891'
+                };
+                
+                const updatedCustomer = await CustomerManager.update(createdCustomer.id, updateData);
+                
+                const updateValid = updatedCustomer && 
+                    updatedCustomer.namaPembeli === 'Robert Johnson' &&
+                    updatedCustomer.noTelp === '083234567891' &&
+                    updatedCustomer.namaBarang === testData.namaBarang;
+                
+                if (updateValid) {
+                    Logger.log('✓ Customer berhasil diupdate', 'success');
+                    TestResults.add('Update Customer - Partial Data', true);
+                } else {
+                    Logger.log('✗ Update customer gagal', 'error');
+                    TestResults.add('Update Customer - Partial Data', false);
+                }
+                
+                // Test 2: Verify ID and timestamp preserved
+                const idPreserved = updatedCustomer.id === createdCustomer.id;
+                const timestampPreserved = updatedCustomer.timestamp === createdCustomer.timestamp;
+                
+                if (idPreserved && timestampPreserved) {
+                    Logger.log('✓ ID dan timestamp terjaga saat update', 'success');
+                    TestResults.add('Update - Preserve Auto Fields', true);
+                } else {
+                    Logger.log('✗ ID atau timestamp berubah saat update', 'error');
+                    TestResults.add('Update - Preserve Auto Fields', false);
+                }
+                
+                // Test 3: Update non-existing customer
+                const nonExistingUpdate = await CustomerManager.update('CUST-99999999-9999', updateData);
+                
+                if (nonExistingUpdate === null) {
+                    Logger.log('✓ Update non-existing customer mengembalikan null', 'success');
+                    TestResults.add('Update Customer - Non-existing ID', true);
+                } else {
+                    Logger.log('✗ Update non-existing customer tidak null', 'error');
+                    TestResults.add('Update Customer - Non-existing ID', false);
+                }
+                
+                Logger.log('');
+                
+            } catch (error) {
+                Logger.log('✗ Error dalam testUpdate: ' + error.message, 'error');
+                TestResults.add('Update Test Suite', false, error.message);
+            }
+        }
+        
+        async function testDelete() {
+            Logger.log('🗑️ TEST: Delete Customer', 'info');
+            
+            try {
+                // Create a customer first
+                const testData = {
+                    namaBarang: 'Keyboard Mechanical RGB',
+                    kategoriBarang: 'Aksesoris',
+                    hargaBarang: 2000000,
+                    kuantitas: 1,
+                    varianBarang: 'Cherry MX Blue',
+                    ongkir: 150000,
+                    sisaBayar: 2150000,
+                    totalBelanja: 2150000,
+                    namaPembeli: 'Alice Smith',
+                    noTelp: '084234567890',
+                    alamat: 'Jl. Gatot Subroto No. 101, Medan'
+                };
+                
+                const createdCustomer = await CustomerManager.create(testData);
+                
+                // Test 1: Delete existing customer
+                const deleteResult = await CustomerManager.delete(createdCustomer.id);
+                
+                if (deleteResult === true) {
+                    Logger.log('✓ Customer berhasil dihapus', 'success');
+                    TestResults.add('Delete Customer - Existing ID', true);
+                } else {
+                    Logger.log('✗ Gagal menghapus customer', 'error');
+                    TestResults.add('Delete Customer - Existing ID', false);
+                }
+                
+                // Test 2: Verify customer is deleted
+                const readAfterDelete = await CustomerManager.read(createdCustomer.id);
+                
+                if (readAfterDelete === null) {
+                    Logger.log('✓ Customer benar-benar terhapus', 'success');
+                    TestResults.add('Delete - Verify Deletion', true);
+                } else {
+                    Logger.log('✗ Customer masih ada setelah dihapus', 'error');
+                    TestResults.add('Delete - Verify Deletion', false);
+                }
+                
+                // Test 3: Delete non-existing customer
+                const deleteNonExisting = await CustomerManager.delete('CUST-99999999-9999');
+                
+                if (deleteNonExisting === false) {
+                    Logger.log('✓ Delete non-existing customer mengembalikan false', 'success');
+                    TestResults.add('Delete Customer - Non-existing ID', true);
+                } else {
+                    Logger.log('✗ Delete non-existing customer tidak false', 'error');
+                    TestResults.add('Delete Customer - Non-existing ID', false);
+                }
+                
+                Logger.log('');
+                
+            } catch (error) {
+                Logger.log('✗ Error dalam testDelete: ' + error.message, 'error');
+                TestResults.add('Delete Test Suite', false, error.message);
+            }
+        }
+        
+        async function testGetAll() {
+            Logger.log('📚 TEST: Get All Customers', 'info');
+            
+            try {
+                // Clear storage first
+                await StorageAPI.clear();
+                
+                // Test 1: Get all from empty storage
+                let allCustomers = await CustomerManager.getAll();
+                
+                if (Array.isArray(allCustomers) && allCustomers.length === 0) {
+                    Logger.log('✓ getAll() mengembalikan array kosong untuk storage kosong', 'success');
+                    TestResults.add('GetAll - Empty Storage', true);
+                } else {
+                    Logger.log('✗ getAll() tidak mengembalikan array kosong', 'error');
+                    TestResults.add('GetAll - Empty Storage', false);
+                }
+                
+                // Test 2: Add multiple customers and get all
+                const customersData = [
+                    {
+                        namaBarang: 'Monitor ASUS 24"',
+                        kategoriBarang: 'Elektronik',
+                        hargaBarang: 2500000,
+                        kuantitas: 2,
+                        varianBarang: 'Full HD',
+                        ongkir: 300000,
+                        sisaBayar: 5300000,
+                        totalBelanja: 5300000,
+                        namaPembeli: 'Customer 1',
+                        noTelp: '081111111111',
+                        alamat: 'Jl. Test 1'
+                    },
+                    {
+                        namaBarang: 'Webcam Logitech HD',
+                        kategoriBarang: 'Aksesoris',
+                        hargaBarang: 800000,
+                        kuantitas: 1,
+                        varianBarang: '1080p',
+                        ongkir: 50000,
+                        sisaBayar: 850000,
+                        totalBelanja: 850000,
+                        namaPembeli: 'Customer 2',
+                        noTelp: '082222222222',
+                        alamat: 'Jl. Test 2'
+                    },
+                    {
+                        namaBarang: 'USB Hub 7 Port',
+                        kategoriBarang: 'Aksesoris',
+                        hargaBarang: 500000,
+                        kuantitas: 3,
+                        varianBarang: 'USB 3.0',
+                        ongkir: 100000,
+                        sisaBayar: 1600000,
+                        totalBelanja: 1600000,
+                        namaPembeli: 'Customer 3',
+                        noTelp: '083333333333',
+                        alamat: 'Jl. Test 3'
+                    }
+                ];
+                
+                for (const data of customersData) {
+                    await CustomerManager.create(data);
+                }
+                
+                allCustomers = await CustomerManager.getAll();
+                
+                if (Array.isArray(allCustomers) && allCustomers.length === 3) {
+                    Logger.log('✓ getAll() mengembalikan semua ' + allCustomers.length + ' customers', 'success');
+                    TestResults.add('GetAll - Multiple Customers', true);
+                } else {
+                    Logger.log('✗ getAll() tidak mengembalikan semua customers', 'error');
+                    TestResults.add('GetAll - Multiple Customers', false);
+                }
+                
+                // Test 3: Verify all customers have required fields
+                const allValid = allCustomers.every(c => 
+                    c.id && c.timestamp && c.namaBarang && c.namaPembeli
+                );
+                
+                if (allValid) {
+                    Logger.log('✓ Semua customers memiliki field yang diperlukan', 'success');
+                    TestResults.add('GetAll - Field Validation', true);
+                } else {
+                    Logger.log('✗ Beberapa customers tidak memiliki field lengkap', 'error');
+                    TestResults.add('GetAll - Field Validation', false);
+                }
+                
+                Logger.log('');
+                
+            } catch (error) {
+                Logger.log('✗ Error dalam testGetAll: ' + error.message, 'error');
+                TestResults.add('GetAll Test Suite', false, error.message);
+            }
+        }
+        
+        async function testSearch() {
+            Logger.log('🔍 TEST: Search Customers', 'info');
+            
+            try {
+                // Get all customers to search from
+                const allCustomers = await CustomerManager.getAll();
+                
+                if (allCustomers.length === 0) {
+                    Logger.log('⚠ Tidak ada customers untuk di-search, skip test', 'error');
+                    TestResults.add('Search Test Suite', false, 'No customers to search');
+                    return;
+                }
+                
+                // Test 1: Search by customer name (partial match)
+                const nameResults = await CustomerManager.search({
+                    field: 'namaPembeli',
+                    value: 'Customer',
+                    exact: false
+                });
+                
+                if (nameResults.length > 0) {
+                    Logger.log('✓ Search by namaPembeli berhasil: ' + nameResults.length + ' hasil', 'success');
+                    TestResults.add('Search - By Name (Partial)', true);
+                } else {
+                    Logger.log('✗ Search by namaPembeli tidak menemukan hasil', 'error');
+                    TestResults.add('Search - By Name (Partial)', false);
+                }
+                
+                // Test 2: Search by category
+                const categoryResults = await CustomerManager.search({
+                    field: 'kategoriBarang',
+                    value: 'Elektronik',
+                    exact: true
+                });
+                
+                if (categoryResults.length > 0) {
+                    Logger.log('✓ Search by kategoriBarang berhasil: ' + categoryResults.length + ' hasil', 'success');
+                    TestResults.add('Search - By Category (Exact)', true);
+                } else {
+                    Logger.log('✗ Search by kategoriBarang tidak menemukan hasil', 'error');
+                    TestResults.add('Search - By Category (Exact)', false);
+                }
+                
+                // Test 3: Search without field (searches all fields)
+                const multiFieldResults = await CustomerManager.search({
+                    value: 'Customer',
+                    exact: false
+                });
+                
+                if (multiFieldResults.length > 0) {
+                    Logger.log('✓ Search multi-field berhasil: ' + multiFieldResults.length + ' hasil', 'success');
+                    TestResults.add('Search - Multi-field', true);
+                } else {
+                    Logger.log('✗ Search multi-field tidak menemukan hasil', 'error');
+                    TestResults.add('Search - Multi-field', false);
+                }
+                
+                // Test 4: Search with no matches
+                const noMatchResults = await CustomerManager.search({
+                    value: 'TIDAK_ADA_YANG_COCOK_12345',
+                    exact: false
+                });
+                
+                if (noMatchResults.length === 0) {
+                    Logger.log('✓ Search dengan no match mengembalikan array kosong', 'success');
+                    TestResults.add('Search - No Matches', true);
+                } else {
+                    Logger.log('✗ Search dengan no match seharusnya kosong', 'error');
+                    TestResults.add('Search - No Matches', false);
+                }
+                
+                Logger.log('');
+                
+            } catch (error) {
+                Logger.log('✗ Error dalam testSearch: ' + error.message, 'error');
+                TestResults.add('Search Test Suite', false, error.message);
+            }
+        }
+        
+        function updateStats() {
+            const stats = TestResults.getStats();
+            document.getElementById('total-tests').textContent = stats.total;
+            document.getElementById('passed-tests').textContent = stats.passed;
+            document.getElementById('failed-tests').textContent = stats.failed;
+        }
+        
+        function displayResults() {
+            const resultsContainer = document.getElementById('test-results');
+            resultsContainer.innerHTML = '';
+            
+            TestResults.tests.forEach(test => {
+                const testCase = document.createElement('div');
+                testCase.className = `test-case ${test.passed ? 'passed' : 'failed'}`;
+                
+                const statusBadge = test.passed ? '✓ PASSED' : '✗ FAILED';
+                const statusClass = test.passed ? 'passed' : 'failed';
+                
+                testCase.innerHTML = `
+                    <h3>
+                        <span class="status-badge ${statusClass}">${statusBadge}</span>
+                        ${test.name}
+                    </h3>
+                    ${test.details ? `<p>Detail: ${test.details}</p>` : ''}
+                    <p>Waktu: ${test.timestamp}</p>
+                `;
+                
+                resultsContainer.appendChild(testCase);
+            });
+        }
+        
+        function clearStorage() {
+            if (confirm('Hapus semua data dari storage?')) {
+                StorageAPI.clear().then(() => {
+                    Logger.log('✓ Storage berhasil dihapus', 'success');
+                    alert('Storage telah dihapus');
+                });
+            }
+        }
+        
+        function clearResults() {
+            TestResults.clear();
+            document.getElementById('test-results').innerHTML = '<p style="color: #999; text-align: center;">Klik tombol "Jalankan Semua Test" untuk memulai</p>';
+            document.getElementById('total-tests').textContent = '0';
+            document.getElementById('passed-tests').textContent = '0';
+            document.getElementById('failed-tests').textContent = '0';
+            Logger.clear();
+        }
+    </script>
+</body>
+</html>

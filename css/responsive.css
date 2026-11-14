@@ -1,16 +1,1189 @@
 /* 
- * responsive.css - Responsive layout styles for Sistem Manajemen Pelanggan Marketplace Indonesia
+ * responsive.css - Responsive layout styles for Expense & Budget Visualizer
  * This file contains:
  * - Mobile-first responsive design approach
  * - Breakpoints:
- *   - Mobile: 320px - 767px
- *   - Tablet: 768px - 1023px
- *   - Desktop: 1024px+
+ *   - Mobile: 320px - 480px (13px font, compact spacing)
+ *   - Tablet: 481px - 768px (14px font, adjusted layouts)
+ *   - Desktop: 769px - 1199px (16px font, full layout)
+ *   - Large screens: 1200px+ (16px font, centered max-width)
  * - Mobile navigation (hamburger menu)
- * - Responsive grid layouts
- * - Responsive tables and forms
- * 
- * To be implemented in Task 13.2
+ * - Responsive typography
+ * - Responsive forms and buttons
+ * - Responsive charts
+ * - Responsive modals
  */
 
-/* Placeholder for responsive styles */
+/* ============================================
+   MOBILE STYLES (Base - 320px to 480px)
+   ============================================ */
+
+@media (max-width: 480px) {
+    :root {
+        font-size: 13px;
+    }
+
+    /* Typography - Compact sizes for mobile */
+    h1 {
+        font-size: 1.25rem;
+        margin-bottom: var(--spacing-md);
+    }
+
+    h2 {
+        font-size: 1.1rem;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    h3 {
+        font-size: 1rem;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    p {
+        font-size: 0.875rem;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    /* Spacing - Compact margins and padding */
+    #app {
+        padding: var(--spacing-sm);
+    }
+
+    /* Forms - Stack vertically, full width */
+    .form-group {
+        margin-bottom: var(--spacing-md);
+    }
+
+    label {
+        font-size: 0.875rem;
+        margin-bottom: var(--spacing-xs);
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    input[type="date"],
+    select,
+    textarea {
+        font-size: 0.875rem;
+        padding: var(--spacing-xs) var(--spacing-sm);
+    }
+
+    /* Buttons - Full width on mobile */
+    .btn {
+        width: 100%;
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: 0.875rem;
+        border-radius: var(--border-radius);
+    }
+
+    .form-actions {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .form-actions .btn {
+        width: 100%;
+        margin: 0;
+    }
+
+    /* Form containers - Full width with reduced padding */
+    .transaction-form,
+    .balance-display,
+    .transaction-list-container,
+    .chart-container {
+        padding: var(--spacing-md);
+        margin-bottom: var(--spacing-md);
+    }
+
+    /* Dashboard KPI - Single column on mobile */
+    #dashboard-kpi {
+        padding: var(--spacing-md);
+        margin-bottom: var(--spacing-md);
+    }
+
+    #dashboard-kpi h1 {
+        font-size: 1.25rem;
+        margin-bottom: var(--spacing-md);
+    }
+
+    .kpi-container {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+
+    .kpi-card {
+        padding: var(--spacing-md);
+    }
+
+    .kpi-value {
+        font-size: 1.5rem;
+    }
+
+    .kpi-trend {
+        font-size: 1.5rem;
+    }
+
+    /* Login form - Mobile optimized */
+    #login-form {
+        padding: var(--spacing-md);
+        max-width: 100%;
+        width: 100%;
+        margin: 0;
+    }
+
+    #login-form h1 {
+        font-size: 1.25rem;
+        margin-bottom: var(--spacing-lg);
+    }
+
+    #login-btn {
+        width: 100%;
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: 0.875rem;
+        margin-top: var(--spacing-md);
+    }
+
+    /* Balance display - Reduced font size */
+    .balance-amount {
+        font-size: 1.5rem;
+    }
+
+    /* Chart - Reduced height for mobile screens */
+    #chart-wrapper {
+        height: 250px;
+    }
+
+    canvas {
+        max-width: 100%;
+        height: auto;
+    }
+
+    /* Navigation - Hamburger menu on mobile */
+    .nav-toggle {
+        display: flex;
+    }
+
+    .nav-menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background-color: var(--color-primary);
+        flex-direction: column;
+        max-height: 0;
+        overflow: hidden;
+        padding: 0;
+        margin: 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+        transition: max-height var(--transition-base);
+        z-index: 999;
+    }
+
+    .nav-menu.active {
+        max-height: 400px;
+        padding: 0;
+    }
+
+    .nav-menu li {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .nav-link {
+        padding: var(--spacing-md) var(--spacing-lg);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        border-left: 3px solid transparent;
+        width: 100%;
+        text-align: left;
+    }
+
+    .nav-link.active {
+        background-color: rgba(255, 255, 255, 0.15);
+        border-left-color: white;
+        border-bottom-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Navigation toggle button */
+    .nav-toggle {
+        position: static;
+        margin-right: auto;
+        margin-left: auto;
+        padding: var(--spacing-md);
+        z-index: 1001;
+    }
+
+    .navigation {
+        position: relative;
+        padding: 0;
+    }
+
+    .nav-menu {
+        justify-content: flex-start;
+    }
+
+    /* Dashboard header - Compact on mobile */
+    .dashboard-header {
+        padding: var(--spacing-md);
+        justify-content: flex-end;
+    }
+
+    #logout-btn {
+        width: 100%;
+        font-size: 0.75rem;
+        padding: var(--spacing-sm) var(--spacing-md);
+    }
+
+    /* Modal - Full width on mobile */
+    .modal-content {
+        width: 95%;
+        padding: var(--spacing-lg);
+        max-width: calc(100% - 1rem);
+    }
+
+    .modal-footer {
+        flex-direction: column-reverse;
+        gap: var(--spacing-sm);
+    }
+
+    .modal-footer .btn {
+        width: 100%;
+        max-width: none;
+    }
+
+    /* Transaction items - Compact layout */
+    .transaction-item {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: var(--spacing-sm);
+        gap: var(--spacing-sm);
+    }
+
+    .transaction-info {
+        width: 100%;
+    }
+
+    .transaction-details {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-xs);
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .transaction-amount {
+        font-size: 1rem;
+        align-self: flex-start;
+    }
+
+    .transaction-item {
+        gap: var(--spacing-sm);
+    }
+
+    /* Messages and alerts - Compact size */
+    .error-message,
+    .success-message,
+    .warning-message,
+    .info-message {
+        font-size: 0.75rem;
+        padding: var(--spacing-sm);
+        margin-top: var(--spacing-sm);
+    }
+
+    #login-error-msg {
+        font-size: 0.75rem;
+        padding: var(--spacing-sm);
+    }
+
+    /* Text utilities - Mobile responsive */
+    .text-small {
+        font-size: 0.75rem;
+    }
+
+    .text-large {
+        font-size: 1rem;
+    }
+
+    /* Utility spacing on mobile */
+    .gap-sm {
+        gap: var(--spacing-xs);
+    }
+
+    .gap-md {
+        gap: var(--spacing-sm);
+    }
+
+    .gap-lg {
+        gap: var(--spacing-md);
+    }
+
+    /* No horizontal overflow */
+    body,
+    html {
+        overflow-x: hidden;
+        max-width: 100vw;
+    }
+
+    /* Responsive images */
+    img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    /* Prevent zoom on input focus (iOS) */
+    input,
+    select,
+    textarea {
+        font-size: 16px;
+    }
+}
+
+/* ============================================
+   TABLET STYLES (481px to 768px)
+   ============================================ */
+
+@media (min-width: 481px) and (max-width: 768px) {
+    :root {
+        font-size: 14px;
+    }
+
+    /* Typography - Tablet sizes */
+    h1 {
+        font-size: 1.5rem;
+        margin-bottom: var(--spacing-lg);
+    }
+
+    h2 {
+        font-size: 1.25rem;
+        margin-bottom: var(--spacing-md);
+    }
+
+    h3 {
+        font-size: 1.1rem;
+        margin-bottom: var(--spacing-md);
+    }
+
+    /* Spacing - Tablet padding */
+    #app {
+        padding: var(--spacing-md);
+    }
+
+    /* Forms - Two column layout on tablet */
+    .transaction-form,
+    .balance-display,
+    .transaction-list-container,
+    .chart-container {
+        padding: var(--spacing-lg);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    /* Dashboard KPI - 2x2 grid on tablet */
+    #dashboard-kpi {
+        padding: var(--spacing-lg);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    #dashboard-kpi h1 {
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .kpi-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-lg);
+    }
+
+    .kpi-card {
+        padding: var(--spacing-lg);
+    }
+
+    .kpi-value {
+        font-size: 1.75rem;
+    }
+
+    .form-group {
+        margin-bottom: var(--spacing-lg);
+    }
+
+    /* Form actions - Can be side by side on tablet */
+    .form-actions {
+        flex-direction: row;
+        gap: var(--spacing-md);
+    }
+
+    .form-actions .btn {
+        flex: 1;
+    }
+
+    /* Buttons - Standard size on tablet */
+    .btn {
+        padding: var(--spacing-sm) var(--spacing-lg);
+        font-size: 1rem;
+    }
+
+    /* Balance display - Larger text */
+    .balance-amount {
+        font-size: 2rem;
+    }
+
+    /* Chart - Adjusted height for tablet */
+    #chart-wrapper {
+        height: 300px;
+    }
+
+    /* Login form - Better size on tablet */
+    #login-form {
+        padding: var(--spacing-2xl);
+        max-width: 400px;
+        width: 100%;
+    }
+
+    #login-btn {
+        width: 100%;
+        padding: var(--spacing-md) var(--spacing-lg);
+    }
+
+    /* Modal - Adjusted for tablet */
+    .modal-content {
+        width: 90%;
+        max-width: 500px;
+        padding: var(--spacing-2xl);
+    }
+
+    .modal-footer {
+        flex-direction: row;
+    }
+
+    .modal-footer .btn {
+        max-width: 150px;
+    }
+
+    /* Navigation - Hamburger still visible on smaller tablets */
+    .nav-toggle {
+        display: flex;
+    }
+
+    .nav-menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height var(--transition-base);
+    }
+
+    .nav-menu.active {
+        max-height: 500px;
+    }
+
+    .nav-link {
+        padding: var(--spacing-md) var(--spacing-lg);
+        border-left: 3px solid transparent;
+    }
+
+    .nav-link.active {
+        border-left-color: white;
+    }
+
+    /* Dashboard header */
+    .dashboard-header {
+        padding: var(--spacing-lg);
+    }
+
+    #logout-btn {
+        font-size: 0.875rem;
+    }
+
+    /* Transaction items - Better layout */
+    .transaction-item {
+        flex-direction: row;
+        align-items: center;
+        padding: var(--spacing-md);
+        gap: var(--spacing-md);
+    }
+
+    .transaction-info {
+        flex: 1;
+    }
+
+    .transaction-details {
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+
+    /* Messages */
+    .error-message,
+    .success-message,
+    .warning-message,
+    .info-message {
+        font-size: 0.875rem;
+        padding: var(--spacing-md);
+    }
+}
+
+/* ============================================
+   DESKTOP STYLES (769px to 1199px)
+   ============================================ */
+
+@media (min-width: 769px) and (max-width: 1199px) {
+    :root {
+        font-size: 16px;
+    }
+
+    /* Spacing - Desktop padding */
+    #app {
+        padding: var(--spacing-lg);
+        max-width: 1000px;
+    }
+
+    /* Forms - Full layout */
+    .transaction-form,
+    .balance-display,
+    .transaction-list-container,
+    .chart-container {
+        padding: var(--spacing-lg);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    /* Dashboard KPI - 4 column grid on desktop */
+    #dashboard-kpi {
+        padding: var(--spacing-lg);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .kpi-container {
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--spacing-lg);
+    }
+
+    .kpi-card {
+        padding: var(--spacing-lg);
+    }
+
+    .kpi-value {
+        font-size: 2rem;
+    }
+
+    /* Buttons - Standard desktop size */
+    .btn {
+        padding: var(--spacing-sm) var(--spacing-lg);
+        font-size: 1rem;
+    }
+
+    .form-actions {
+        flex-direction: row;
+        gap: var(--spacing-md);
+    }
+
+    .form-actions .btn {
+        flex: 1;
+        max-width: 200px;
+    }
+
+    /* Chart - Standard height */
+    #chart-wrapper {
+        height: 400px;
+    }
+
+    /* Navigation - Horizontal menu on desktop */
+    .nav-toggle {
+        display: none;
+    }
+
+    .nav-menu {
+        flex-direction: row;
+        max-height: none;
+        overflow: visible;
+        padding: var(--spacing-md) var(--spacing-lg);
+    }
+
+    .nav-link {
+        padding: var(--spacing-md) var(--spacing-lg);
+        border-bottom: 3px solid transparent;
+    }
+
+    .nav-link.active {
+        border-bottom-color: white;
+    }
+
+    .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Modal - Standard desktop size */
+    .modal-content {
+        width: 90%;
+        max-width: 500px;
+        padding: var(--spacing-2xl);
+    }
+
+    .modal-footer {
+        flex-direction: row;
+        justify-content: flex-end;
+    }
+
+    .modal-footer .btn {
+        max-width: 150px;
+    }
+
+    /* Dashboard header */
+    .dashboard-header {
+        padding: var(--spacing-lg);
+    }
+
+    /* Transaction items - Standard layout */
+    .transaction-item {
+        flex-direction: row;
+        align-items: center;
+        padding: var(--spacing-md);
+    }
+
+    .transaction-info {
+        flex: 1;
+    }
+
+    .transaction-details {
+        flex-direction: row;
+        align-items: center;
+        gap: var(--spacing-md);
+    }
+}
+
+/* ============================================
+   LARGE SCREENS (1200px+)
+   ============================================ */
+
+@media (min-width: 1200px) {
+    :root {
+        font-size: 16px;
+    }
+
+    /* Max width container centered */
+    #app {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: var(--spacing-lg);
+    }
+
+    /* Forms - Optimal width */
+    .transaction-form,
+    .balance-display,
+    .transaction-list-container,
+    .chart-container {
+        padding: var(--spacing-xl);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    /* Dashboard KPI - Full 4 column grid on large screens */
+    #dashboard-kpi {
+        padding: var(--spacing-xl);
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .kpi-container {
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--spacing-xl);
+    }
+
+    .kpi-card {
+        padding: var(--spacing-xl);
+    }
+
+    .kpi-value {
+        font-size: 2.5rem;
+    }
+
+    /* Buttons - Standard size */
+    .btn {
+        padding: var(--spacing-sm) var(--spacing-lg);
+        font-size: 1rem;
+    }
+
+    .form-actions {
+        flex-direction: row;
+        gap: var(--spacing-md);
+    }
+
+    .form-actions .btn {
+        flex: 1;
+        max-width: 150px;
+    }
+
+    /* Chart - Standard height */
+    #chart-wrapper {
+        height: 400px;
+    }
+
+    /* Navigation - Horizontal layout */
+    .nav-toggle {
+        display: none;
+    }
+
+    .nav-menu {
+        flex-direction: row;
+        max-height: none;
+        overflow: visible;
+        padding: var(--spacing-md) var(--spacing-lg);
+        justify-content: center;
+    }
+
+    .nav-link {
+        padding: var(--spacing-md) var(--spacing-lg);
+        border-bottom: 3px solid transparent;
+    }
+
+    .nav-link.active {
+        border-bottom-color: white;
+        background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Modal - Standard size */
+    .modal-content {
+        width: 90%;
+        max-width: 500px;
+        padding: var(--spacing-2xl);
+    }
+
+    /* Dashboard header */
+    .dashboard-header {
+        padding: var(--spacing-lg) var(--spacing-xl);
+        justify-content: flex-end;
+    }
+
+    /* Transaction items - Optimal spacing */
+    .transaction-item {
+        flex-direction: row;
+        align-items: center;
+        padding: var(--spacing-md) var(--spacing-lg);
+        gap: var(--spacing-lg);
+    }
+
+    .transaction-details {
+        flex-direction: row;
+        align-items: center;
+        gap: var(--spacing-md);
+    }
+}
+
+/* ============================================
+   UNIVERSAL RESPONSIVE UTILITIES
+   ============================================ */
+
+/* Responsive text hiding/showing */
+@media (max-width: 480px) {
+    .hide-mobile {
+        display: none !important;
+    }
+
+    .show-mobile {
+        display: block !important;
+    }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+    .hide-tablet {
+        display: none !important;
+    }
+
+    .show-tablet {
+        display: block !important;
+    }
+}
+
+@media (min-width: 769px) {
+    .hide-desktop {
+        display: none !important;
+    }
+
+    .show-desktop {
+        display: block !important;
+    }
+}
+
+/* Responsive font scaling */
+@media (max-width: 480px) {
+    .responsive-text-sm {
+        font-size: 0.75rem;
+    }
+
+    .responsive-text-md {
+        font-size: 1rem;
+    }
+
+    .responsive-text-lg {
+        font-size: 1.25rem;
+    }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+    .responsive-text-sm {
+        font-size: 0.875rem;
+    }
+
+    .responsive-text-md {
+        font-size: 1rem;
+    }
+
+    .responsive-text-lg {
+        font-size: 1.25rem;
+    }
+}
+
+@media (min-width: 769px) {
+    .responsive-text-sm {
+        font-size: 0.875rem;
+    }
+
+    .responsive-text-md {
+        font-size: 1rem;
+    }
+
+    .responsive-text-lg {
+        font-size: 1.125rem;
+    }
+}
+
+/* Responsive spacing utilities */
+@media (max-width: 480px) {
+    .responsive-p {
+        padding: var(--spacing-sm);
+    }
+
+    .responsive-m {
+        margin: var(--spacing-sm);
+    }
+
+    .responsive-gap {
+        gap: var(--spacing-sm);
+    }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+    .responsive-p {
+        padding: var(--spacing-md);
+    }
+
+    .responsive-m {
+        margin: var(--spacing-md);
+    }
+
+    .responsive-gap {
+        gap: var(--spacing-md);
+    }
+}
+
+@media (min-width: 769px) {
+    .responsive-p {
+        padding: var(--spacing-lg);
+    }
+
+    .responsive-m {
+        margin: var(--spacing-lg);
+    }
+
+    .responsive-gap {
+        gap: var(--spacing-lg);
+    }
+}
+
+/* ============================================
+   TOUCH-FRIENDLY RESPONSIVE
+   ============================================ */
+
+/* Larger touch targets on mobile */
+@media (max-width: 768px) and (hover: none) and (pointer: coarse) {
+    .btn {
+        min-height: 44px;
+        min-width: 44px;
+        padding: var(--spacing-md);
+    }
+
+    input[type="checkbox"],
+    input[type="radio"] {
+        min-height: 24px;
+        min-width: 24px;
+    }
+
+    .transaction-item {
+        min-height: 50px;
+    }
+
+    .nav-link {
+        min-height: 48px;
+    }
+}
+
+/* ============================================
+   PRINT STYLES (Bonus)
+   ============================================ */
+
+@media print {
+    .nav-toggle,
+    .navigation,
+    .dashboard-header,
+    #logout-btn,
+    .form-actions,
+    .btn-delete {
+        display: none !important;
+    }
+
+    #app {
+        padding: 0;
+        max-width: 100%;
+    }
+
+    .transaction-item {
+        page-break-inside: avoid;
+    }
+
+    .chart-container,
+    .transaction-form {
+        page-break-inside: avoid;
+    }
+}
+
+/* ============================================
+   ACCESSIBILITY - RESPONSIVE
+   ============================================ */
+
+/* Focus visible - Responsive sizes */
+@media (max-width: 480px) {
+    button:focus-visible,
+    a:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+        outline-width: 2px;
+        outline-offset: 1px;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    .nav-menu {
+        transition: none;
+    }
+
+    .modal {
+        animation: none;
+    }
+
+    .modal-content {
+        animation: none;
+    }
+}
+
+
+/* ============================================
+   RESPONSIVE SEARCH CONTAINER STYLES
+   Task 9.1 - Search UI Component
+   ============================================ */
+
+/* Mobile - Search Container */
+@media (max-width: 480px) {
+    .search-container {
+        padding: var(--spacing-md);
+        margin-bottom: var(--spacing-md);
+    }
+
+    .search-container h1 {
+        font-size: 1.25rem;
+        margin-bottom: var(--spacing-md);
+    }
+
+    .search-form-group {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .search-form-group input[type="text"] {
+        min-width: 100%;
+    }
+
+    .search-form-group .btn {
+        width: 100%;
+    }
+
+    .search-results table {
+        font-size: 0.75rem;
+    }
+
+    .search-results table th,
+    .search-results table td {
+        padding: var(--spacing-xs);
+    }
+
+    .search-result-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .search-result-actions .btn {
+        width: 100%;
+    }
+
+    .empty-state {
+        padding: var(--spacing-md);
+    }
+
+    .empty-state p {
+        font-size: 1rem;
+    }
+}
+
+/* Tablet - Search Container */
+@media (min-width: 481px) and (max-width: 768px) {
+    .search-container {
+        padding: var(--spacing-lg);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .search-container h1 {
+        font-size: 1.5rem;
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .search-form-group {
+        flex-direction: row;
+        gap: var(--spacing-md);
+        align-items: flex-start;
+    }
+
+    .search-form-group input[type="text"] {
+        flex: 1;
+        min-width: 150px;
+    }
+
+    .search-form-group .btn {
+        flex-shrink: 0;
+    }
+
+    .search-results table {
+        font-size: 0.875rem;
+    }
+
+    .search-results table th,
+    .search-results table td {
+        padding: var(--spacing-sm);
+    }
+
+    .search-result-actions {
+        flex-wrap: wrap;
+    }
+
+    .search-result-actions .btn {
+        flex: 1;
+        min-width: 80px;
+    }
+
+    .empty-state {
+        padding: var(--spacing-lg);
+    }
+
+    .empty-state p {
+        font-size: 1.1rem;
+    }
+}
+
+/* Desktop and Large Screens - Search Container */
+@media (min-width: 769px) {
+    .search-container {
+        padding: var(--spacing-lg);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .search-container h1 {
+        font-size: 1.5rem;
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .search-form-group {
+        flex-direction: row;
+        gap: var(--spacing-md);
+        align-items: flex-start;
+    }
+
+    .search-form-group input[type="text"] {
+        flex: 1;
+        min-width: 250px;
+    }
+
+    .search-form-group .btn {
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+
+    .search-results table {
+        font-size: 1rem;
+    }
+
+    .search-results table th,
+    .search-results table td {
+        padding: var(--spacing-md);
+    }
+
+    .search-result-actions {
+        flex-direction: row;
+        gap: var(--spacing-md);
+    }
+
+    .search-result-actions .btn {
+        width: auto;
+    }
+
+    .empty-state {
+        padding: var(--spacing-2xl);
+    }
+
+    .empty-state p {
+        font-size: 1.1rem;
+    }
+}
+
+/* Responsive search results table scrolling on small screens */
+@media (max-width: 768px) {
+    .search-results table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .search-results table thead {
+        display: block;
+    }
+
+    .search-results table tbody {
+        display: block;
+    }
+
+    .search-results table tr {
+        display: block;
+    }
+
+    .search-results table th,
+    .search-results table td {
+        display: inline-block;
+        min-width: 80px;
+    }
+}
+
+/* Touch-friendly search buttons */
+@media (max-width: 768px) and (hover: none) and (pointer: coarse) {
+    .search-result-actions .btn {
+        min-height: 44px;
+        padding: var(--spacing-sm) var(--spacing-md);
+    }
+}
