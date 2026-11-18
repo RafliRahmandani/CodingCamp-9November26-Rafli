@@ -1,4 +1,4 @@
-﻿/**
+/**
  * app.js - Main application file
  * 
  * This is the entry point that coordinates all modules.
@@ -134,24 +134,20 @@ function updateUIBasedOnAuthState() {
         // Show navigation menu
         NavigationManager.showNavigation();
 
-        // Ensure the default dashboard section is visible after login.
-        // NavigationManager.init() runs before login so sections are hidden;
-        // we must explicitly show the current route's section here.
-        const currentRoute = NavigationManager.getCurrentRoute();
-        const targetId = currentRoute === '/form' ? 'dashboard-kpi'
-                       : currentRoute === '/search' ? 'search'
-                       : currentRoute === '/analytics' ? 'analytics-section'
-                       : 'dashboard-kpi';
-        const targetSection = document.getElementById(targetId);
-        if (targetSection) {
-            targetSection.style.display = 'block';
-        }
+        // Force-show dashboard-kpi. hideAllSections() hides it at startup
+        // (NavigationManager.init runs before login), so we restore it here.
+        var kpi=document.getElementById('dashboard-kpi');
+        var srch=document.getElementById('search');
+        var anlx=document.getElementById('analytics-section');
+        if(kpi)  kpi.style.display='block';
+        if(srch) srch.style.display='none';
+        if(anlx) anlx.style.display='none';
         
         // Announce to screen readers
         announceToScreenReader('Login berhasil. Dashboard dimuat.', 'polite');
     } else {
         // Show login form, hide dashboard
-        loginSection.style.display = 'block';
+        loginSection.style.display = 'flex';
         dashboard.style.display = 'none';
         
         // Hide navigation menu
