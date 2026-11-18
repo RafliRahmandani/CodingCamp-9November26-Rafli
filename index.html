@@ -20,7 +20,7 @@
     <div id="notification-container" class="notification-container" role="region" aria-live="polite" aria-label="Notifikasi sistem"></div>
 
     <!-- Main application container -->
-    <div id="app" role="application" aria-label="Aplikasi Manajemen Pelanggan Marketplace"
+    <div id="app" role="application" aria-label="Aplikasi Manajemen Pelanggan Marketplace">
         <!-- Login Section -->
         <section id="login-section" class="login-container" role="main" aria-label="Form login aplikasi">
             <form id="login-form" novalidate>
@@ -389,7 +389,7 @@
 
             <!-- Balance Display Section -->
             <div class="balance-display">
-                <h2>Total Expenses</h2>
+                <h2>Total Pengeluaran</h2>
                 <div id="balance-amount" class="balance-amount" aria-live="polite">
                     $0.00
                 </div>
@@ -397,20 +397,20 @@
 
             <!-- Transaction List Section -->
             <div class="transaction-list-container">
-                <h2>Transaction History</h2>
+                <h2>Riwayat Transaksi</h2>
                 <div id="transaction-list" class="transaction-list" role="list">
                     <!-- Dynamic content rendered here -->
-                    <p class="empty-state">No transactions recorded</p>
+                    <p class="empty-state">Belum ada transaksi tercatat</p>
                 </div>
             </div>
 
             <!-- Chart Section -->
             <div class="chart-container">
-                <h2>Expenses by Category</h2>
+                <h2>Pengeluaran per Kategori</h2>
                 <div id="chart-wrapper">
                     <canvas id="expense-chart" aria-label="Pie chart showing expense distribution by category"></canvas>
                     <p id="chart-empty-state" class="chart-empty-state" style="display: none;">
-                        No expense data available
+                        Tidak ada data pengeluaran
                     </p>
                 </div>
             </div>
@@ -506,7 +506,7 @@
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"
             integrity="sha384-GsW3YpbcyNmCUMIybN8xIVG45+6Kz5YuHg60/JicLkOLVmMetasleFgJDM6KTf60m"
-            crossorigin="anonymous"></script>
+            crossorigin="anonymous" async></script>
 
     <!-- Storage API Wrapper -->
     <script src="js/storage-api.js" defer></script>
@@ -551,3 +551,5 @@
     <script src="js/app.js" defer></script>
 </body>
 </html>
+
+

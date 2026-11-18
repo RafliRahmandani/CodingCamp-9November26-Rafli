@@ -1,25 +1,12 @@
-/**
- * navigation-manager.js - Navigation Manager module for SPA routing
- * 
- * This module provides SPA routing functionality:
- * - navigateTo(route) - navigate to a route
- * - getCurrentRoute() - get current route
- * - init() - initialize routing
- * 
- * Uses hash-based routing (#/dashboard, #/form, etc.)
- * Uses IIFE module pattern for encapsulation.
- * Implemented in Task 4.1
- */
-
-const NavigationManager = (function() {
+﻿const NavigationManager = (function() {
     'use strict';
     
     // Private constants
     const ROUTE_REGISTRY = {
-        '/': 'dashboard',
-        '/form': 'transaksi',
-        '/search': 'pencarian',
-        '/analytics': 'analitik'
+        '/': 'dashboard-kpi',      // Dashboard section (KPI cards and form)
+        '/form': 'dashboard-kpi',  // Form adalah bagian dari dashboard (scroll down)
+        '/search': 'search',       // Search section
+        '/analytics': 'analytics-section' // Analytics section
     };
     
     const DEFAULT_ROUTE = '/';
@@ -61,7 +48,12 @@ const NavigationManager = (function() {
      * Private helper: Hide all sections
      */
     function hideAllSections() {
-        const allSections = document.querySelectorAll('[id="dashboard"], [id="transaksi"], [id="pencarian"], [id="analitik"]');
+        const allSections = [
+            document.getElementById('dashboard-kpi'),
+            document.getElementById('search'),
+            document.getElementById('analytics-section')
+        ];
+        
         allSections.forEach(section => {
             if (section) {
                 section.style.display = 'none';
@@ -81,6 +73,17 @@ const NavigationManager = (function() {
             const section = document.getElementById(sectionId);
             if (section) {
                 section.style.display = 'block';
+                
+                // Special handling for /form route: scroll to form
+                if (route === '/form') {
+                    const form = document.getElementById('transaction-form');
+                    if (form) {
+                        // Small delay to ensure section is visible
+                        setTimeout(() => {
+                            form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 100);
+                    }
+                }
             }
         }
     }
@@ -257,7 +260,7 @@ const NavigationManager = (function() {
             
             // Validate route
             if (!ROUTE_REGISTRY.hasOwnProperty(normalizedRoute)) {
-                console.warn(`[NavigationManager] Invalid route: ${normalizedRoute}`);
+                console.warn([NavigationManager] Invalid route: );
                 return false;
             }
             
