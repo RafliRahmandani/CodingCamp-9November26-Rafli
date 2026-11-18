@@ -1,4 +1,4 @@
-/**
+﻿/**
  * app.js - Main application file
  * 
  * This is the entry point that coordinates all modules.
@@ -133,6 +133,19 @@ function updateUIBasedOnAuthState() {
         
         // Show navigation menu
         NavigationManager.showNavigation();
+
+        // Ensure the default dashboard section is visible after login.
+        // NavigationManager.init() runs before login so sections are hidden;
+        // we must explicitly show the current route's section here.
+        const currentRoute = NavigationManager.getCurrentRoute();
+        const targetId = currentRoute === '/form' ? 'dashboard-kpi'
+                       : currentRoute === '/search' ? 'search'
+                       : currentRoute === '/analytics' ? 'analytics-section'
+                       : 'dashboard-kpi';
+        const targetSection = document.getElementById(targetId);
+        if (targetSection) {
+            targetSection.style.display = 'block';
+        }
         
         // Announce to screen readers
         announceToScreenReader('Login berhasil. Dashboard dimuat.', 'polite');
@@ -819,11 +832,17 @@ async function handleTransactionFormSubmit(event) {
         }
         
         if (result) {
-            // Show success notification
-            NotificationManager.success(successMessage);
+            // Show success notification with customer ID
+            const customerIdMessage = result.idPelanggan ? `\nID Pelanggan: ${result.idPelanggan}` : '';
+            const fullSuccessMessage = `${successMessage}${customerIdMessage}`;
             
-            // Announce to screen readers
-            announceToScreenReader(successMessage, 'polite');
+            NotificationManager.success(fullSuccessMessage);
+            
+            // Announce to screen readers with customer ID
+            const screenReaderMessage = result.idPelanggan 
+                ? `${successMessage}. ID Pelanggan: ${result.idPelanggan}`
+                : successMessage;
+            announceToScreenReader(screenReaderMessage, 'polite');
             
             // Reset form to new mode
             resetFormToNewMode();
@@ -879,7 +898,7 @@ async function handleTransactionFormSubmit(event) {
 
 /**
  * Calculate and update Total Belanja field
- * Formula: Total Belanja = (Kuantitas × Harga Barang) + Ongkir + Sisa Bayar
+ * Formula: Total Belanja = (Kuantitas Ã— Harga Barang) + Ongkir + Sisa Bayar
  * 
  * Triggers on change of:
  * - Harga Barang (unit price)
@@ -896,7 +915,7 @@ function updateTotalBelanja() {
         const sisaBayar = parseFloat(document.getElementById('sisaBayar')?.value || 0);
         
         // Calculate using CalculationEngine
-        // Formula: (Quantity × Price) + Shipping + Remaining Payment
+        // Formula: (Quantity Ã— Price) + Shipping + Remaining Payment
         const subtotal = (kuantitas * hargaBarang) + ongkir + sisaBayar;
         
         // Ensure non-negative total
@@ -1144,6 +1163,31 @@ function initializeApp() {
  * Handle navigation to analytics route and render charts
  * Called when user navigates to /analytics
  */
+/**
+ * Waits for Chart.js library to be available
+ * @param {number} timeout - Maximum time to wait in milliseconds (default: 5000ms)
+ * @returns {Promise<boolean>} - True if Chart.js is available, false if timeout
+ */
+async function waitForChartLibrary(timeout = 5000) {
+    const startTime = Date.now();
+    console.log('[Analytics] Waiting for Chart.js library...');
+    
+    while (Date.now() - startTime < timeout) {
+        if (typeof Chart !== 'undefined') {
+            console.log('[Analytics] Chart.js library loaded successfully');
+            return true;
+        }
+        // Wait 50ms before checking again
+        await new Promise(resolve => setTimeout(resolve, 50));
+    }
+    
+    console.warn('[Analytics] Chart.js library timeout after ' + timeout + 'ms');
+    return false;
+}
+
+/**
+ * Called when user navigates to /analytics
+
 function setupChartRouteHandler() {
     // Store original navigateTo method
     const originalNavigateTo = NavigationManager.navigateTo.bind(NavigationManager);
@@ -1166,8 +1210,16 @@ function setupChartRouteHandler() {
  */
 async function handleAnalyticsRoute() {
     try {
+        console.log('[Analytics] Starting analytics route handler...');
+        
         // Destroy any existing charts first (prevent memory leaks)
         ChartManager.destroyCharts();
+        
+        // Wait for Chart.js library to be available
+        const chartReady = await waitForChartLibrary(5000);
+        if (!chartReady) {
+            throw new Error('Chart.js library did not load within timeout period');
+        }
         
         // Small delay to ensure DOM is ready
         await new Promise(resolve => setTimeout(resolve, 100));
@@ -1175,11 +1227,19 @@ async function handleAnalyticsRoute() {
         // Render all charts
         await ChartManager.renderCharts();
         
-        console.log('Analytics charts initialized');
+        console.log('[Analytics] Analytics charts initialized successfully');
         
     } catch (error) {
-        console.error('Error initializing analytics charts:', error);
-        NotificationManager.error('Gagal memuat grafik analitik');
+        console.error('[Analytics] Error initializing charts:', error);
+        
+        // Clean up loading states from all chart containers on error
+        document.querySelectorAll('.analytics-chart-container').forEach(container => {
+            container.classList.remove('loading');
+            container.setAttribute('aria-busy', 'false');
+        });
+        
+        NotificationManager.error('Gagal memuat grafik analitik. Silakan refresh halaman.');
+        announceToScreenReader('Gagal memuat grafik analitik', 'assertive');
     }
 }
 
@@ -1190,4 +1250,6 @@ if (document.readyState === 'loading') {
     // DOM is already loaded
     initializeApp();
 }
+
+
 
