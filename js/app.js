@@ -1181,9 +1181,7 @@ async function waitForChartLibrary(timeout = 5000) {
     return false;
 }
 
-/**
- * Called when user navigates to /analytics
-
+// Called when user navigates to /analytics
 function setupChartRouteHandler() {
     // Store original navigateTo method
     const originalNavigateTo = NavigationManager.navigateTo.bind(NavigationManager);
