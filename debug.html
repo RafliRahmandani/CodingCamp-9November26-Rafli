@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Debug Login</title>
+<style>
+  body { font-family: monospace; padding: 20px; background: #1e1e1e; color: #d4d4d4; }
+  h2 { color: #569cd6; }
+  .ok  { color: #6a9955; }
+  .err { color: #f44747; }
+  .warn{ color: #ce9178; }
+  pre  { background: #252526; padding: 10px; border-radius: 4px; white-space: pre-wrap; }
+  button { padding: 10px 20px; margin: 5px; cursor: pointer; font-size: 14px; }
+  #log { max-height: 400px; overflow-y: auto; }
+</style>
+</head>
+<body>
+<h2>🔍 Diagnostik Login App</h2>
+<button onclick="runDiagnostics()">▶ Jalankan Diagnostik</button>
+<button onclick="testLogin()">🔑 Test Login admin/123456</button>
+<button onclick="clearLog()">🗑 Bersihkan Log</button>
+<pre id="log"></pre>
+
+<script>
+const log = document.getElementById('log');
+function write(msg, type='') {
+  const cls = type === 'ok' ? 'ok' : type === 'err' ? 'err' : type === 'warn' ? 'warn' : '';
+  log.innerHTML += `<span class="${cls}">${msg}</span>\n`;
+  log.scrollTop = log.scrollHeight;
+}
+function clearLog() { log.innerHTML = ''; }
+
+// Intercept console errors
+const origError = console.error.bind(console);
+console.error = (...args) => { write('[console.error] ' + args.join(' '), 'err'); origError(...args); };
+const origWarn = console.warn.bind(console);
+console.warn  = (...args) => { write('[console.warn]  ' + args.join(' '), 'warn'); origWarn(...args); };
+
+// Catch global errors
+window.addEventListener('error', (e) => {
+  write(`[JS ERROR] ${e.message}  →  ${e.filename}:${e.lineno}:${e.colno}`, 'err');
+});
+window.addEventListener('unhandledrejection', (e) => {
+  write(`[UNHANDLED PROMISE] ${e.reason}`, 'err');
+});
+
+function runDiagnostics() {
+  clearLog();
+  write('=== Diagnostik dimulai ===');
+
+  // 1. Cek semua modul
+  const modules = [
+    'StorageAPI','CacheManager','ValidationEngine','CalculationEngine',
+    'AuthManager','CustomerManager','SearchManager','NotificationManager',
+    'LoadingManager','DashboardManager','ChartManager','ExportManager',
+    'NavigationManager'
+  ];
+  write('\n--- Modul JavaScript ---');
+  let allOk = true;
+  modules.forEach(m => {
+    if (typeof window[m] !== 'undefined') {
+      write(`  ✓ ${m}`, 'ok');
+    } else {
+      write(`  ✗ ${m} — TIDAK DITEMUKAN`, 'err');
+      allOk = false;
+    }
+  });
+
+  // 2. Cek fungsi app utama
+  write('\n--- Fungsi Utama app.js ---');
+  const fns = [
+    'initializeApp','updateUIBasedOnAuthState','handleLoginSubmit',
+    'handleLogout','setupEventListeners','setupChartRouteHandler'
+  ];
+  fns.forEach(f => {
+    if (typeof window[f] === 'function') {
+      write(`  ✓ ${f}`, 'ok');
+    } else {
+      write(`  ✗ ${f} — TIDAK DITEMUKAN (app.js mungkin gagal parse)`, 'err');
+      allOk = false;
+    }
+  });
+
+  // 3. Cek localStorage
+  write('\n--- localStorage ---');
+  try {
+    localStorage.setItem('__test__','1');
+    localStorage.removeItem('__test__');
+    write('  ✓ localStorage tersedia', 'ok');
+  } catch(e) {
+    write(`  ✗ localStorage error: ${e.message}`, 'err');
+  }
+
+  // 4. Cek sessionStorage
+  write('\n--- sessionStorage ---');
+  try {
+    sessionStorage.setItem('__test__','1');
+    sessionStorage.removeItem('__test__');
+    write('  ✓ sessionStorage tersedia', 'ok');
+  } catch(e) {
+    write(`  ✗ sessionStorage error: ${e.message}`, 'err');
+  }
+
+  // 5. Cek elemen DOM penting
+  write('\n--- Elemen DOM ---');
+  const els = [
+    'login-section','login-form','username-input','password-input',
+    'login-btn','login-error-msg','dashboard','dashboard-kpi',
+    'nav-menu','logout-btn'
+  ];
+  els.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      write(`  ✓ #${id}`, 'ok');
+    } else {
+      write(`  ✗ #${id} — TIDAK ADA DI DOM`, 'err');
+    }
+  });
+
+  // 6. Cek event listener pada form login
+  write('\n--- Login Form Event ---');
+  const form = document.getElementById('login-form');
+  if (form) {
+    write('  Form login ditemukan', 'ok');
+    // Cek apakah ada handler dengan cara dispatch event
+    write('  (cek lewat tombol Test Login)', 'warn');
+  } else {
+    write('  Form login TIDAK ditemukan', 'err');
+  }
+
+  // 7. Status auth saat ini
+  write('\n--- Status Auth ---');
+  if (typeof AuthManager !== 'undefined') {
+    const isAuth = AuthManager.isAuthenticated();
+    write(`  isAuthenticated: ${isAuth}`, isAuth ? 'ok' : 'warn');
+    const user = AuthManager.getCurrentUser();
+    write(`  currentUser: ${JSON.stringify(user)}`);
+  } else {
+    write('  AuthManager tidak tersedia', 'err');
+  }
+
+  if (allOk) {
+    write('\n✅ Semua modul OK — masalah mungkin di logika runtime', 'ok');
+  } else {
+    write('\n❌ Ada modul yang gagal dimuat — periksa error di atas', 'err');
+  }
+}
+
+function testLogin() {
+  write('\n=== Test Login admin/123456 ===');
+  if (typeof AuthManager === 'undefined') {
+    write('  AuthManager tidak tersedia!', 'err');
+    return;
+  }
+  const session = AuthManager.login('admin', '123456');
+  if (session) {
+    write(`  ✓ Login BERHASIL: ${JSON.stringify(session)}`, 'ok');
+    write('  Memanggil updateUIBasedOnAuthState...');
+    if (typeof updateUIBasedOnAuthState === 'function') {
+      updateUIBasedOnAuthState();
+      write('  ✓ updateUIBasedOnAuthState dipanggil', 'ok');
+      const dash = document.getElementById('dashboard');
+      const kpi  = document.getElementById('dashboard-kpi');
+      write(`  dashboard display: ${dash ? dash.style.display : 'tidak ada'}`, dash && dash.style.display === 'block' ? 'ok' : 'err');
+      write(`  dashboard-kpi display: ${kpi ? kpi.style.display : 'tidak ada'}`, kpi && kpi.style.display === 'block' ? 'ok' : 'err');
+    } else {
+      write('  updateUIBasedOnAuthState tidak ada!', 'err');
+    }
+    AuthManager.logout(); // reset setelah test
+  } else {
+    write('  ✗ Login GAGAL — credentials salah atau AuthManager error', 'err');
+  }
+}
+</script>
+
+<!-- Load semua script yang sama seperti index.html -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" crossorigin="anonymous" async></script>
+<script src="js/storage-api.js" defer></script>
+<script src="js/cache-manager.js" defer></script>
+<script src="js/validation-engine.js" defer></script>
+<script src="js/calculation-engine.js" defer></script>
+<script src="js/auth-manager.js" defer></script>
+<script src="js/customer-manager.js" defer></script>
+<script src="js/search-manager.js" defer></script>
+<script src="js/notification-manager.js" defer></script>
+<script src="js/loading-manager.js" defer></script>
+<script src="js/dashboard-manager.js" defer></script>
+<script src="js/chart-manager.js" defer></script>
+<script src="js/export-manager.js" defer></script>
+<script src="js/navigation-manager.js" defer></script>
+<script src="js/app.js" defer></script>
+</body>
+</html>
