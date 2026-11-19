@@ -120,7 +120,7 @@
             </section>
 
             <!-- Input Form Section -->
-            <form id="transaction-form" class="transaction-form" novalidate aria-label="Formulir tambah transaksi">
+            <form id="transaction-form" class="transaction-form" novalidate onsubmit="return false;" aria-label="Formulir tambah transaksi">
                 <h1>Tambah Transaksi</h1>
                 
                 <!-- Product Information Section -->
@@ -361,7 +361,7 @@
             <!-- Search Section -->
             <section id="search" class="search-container" style="display: none;" role="region" aria-label="Bagian pencarian pelanggan">
                 <h1>Cari Pelanggan</h1>
-                <form id="search-form" novalidate aria-label="Formulir untuk mencari pelanggan">
+                <form id="search-form" novalidate onsubmit="return false;" aria-label="Formulir untuk mencari pelanggan">
                     <div class="search-form-group">
                         <input 
                             type="text" 
@@ -547,11 +547,12 @@
 
     <!-- Application Script -->
     <script src="js/app.js" defer></script>
+    <script src="js/failsafe.js" defer></script>
 
     <!-- FAILSAFE: pasang login handler langsung tanpa bergantung app.js -->
     <script>
     document.addEventListener("DOMContentLoaded", function() {
-        var form = document.getElementById("login-form");
+        return; var form = document.getElementById("login-form");
         if (!form) return;
         form.addEventListener("submit", function(e) {
             e.preventDefault();
