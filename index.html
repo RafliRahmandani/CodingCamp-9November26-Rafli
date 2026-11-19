@@ -23,7 +23,7 @@
     <div id="app" role="application" aria-label="Aplikasi Manajemen Pelanggan Marketplace">
         <!-- Login Section -->
         <section id="login-section" class="login-container" role="main" aria-label="Form login aplikasi">
-            <form id="login-form" novalidate>
+            <form id="login-form" novalidate onsubmit="return false;">
                 <h1>Masuk ke Aplikasi</h1>
                 
                 <div class="form-group">
@@ -547,6 +547,22 @@
 
     <!-- Application Script -->
     <script src="js/app.js" defer></script>
+
+    <!-- FAILSAFE: pasang login handler langsung tanpa bergantung app.js -->
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var form = document.getElementById("login-form");
+        if (!form) return;
+        form.addEventListener("submit", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (typeof handleLoginSubmit === "function") {
+                handleLoginSubmit(e);
+            }
+            return false;
+        }, true);
+    });
+    </script>
 </body>
 </html>
 
